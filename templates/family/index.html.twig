@@ -1,0 +1,268 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ma famille • TribuConnect{% endblock %}
+
+{% block body %}
+  <h1>Ma famille</h1>
+  {% set ownsOne = false %}
+  {% if families is defined %}
+    {% for f in families %}
+      {% if f.owner and app.user and f.owner.id == app.user.id %}{% set ownsOne = true %}{% endif %}
+    {% endfor %}
+  {% endif %}
+
+  <style>
+    .chat-box { border:1px solid #e0e4ea; border-radius:.6rem; padding:.6rem; background:#fff; max-height: 360px; overflow-y: auto; }
+    @media (max-width: 768px) {
+      .chat-box { max-height: 45vh; }
+    }
+  </style>
+
+  {% if not familyForm and family %}
+    <article>
+      <strong>Nom:</strong> {{ family.name }}<br>
+      <strong>Membres:</strong> {{ family.members|length }}
+      <div style="margin-top:.35rem; display:flex; flex-wrap:wrap; gap:.35rem;">
+        {% for m in family.members %}
+          <span style="display:inline-block; padding:.3rem .6rem; border-radius:.5rem; border:1px solid #4472CA; background:#4472CA; color:#fff;">
+            {{ m.firstName }} {{ m.lastName|upper }}
+            {% if family.owner and m.id == family.owner.id %}
+              <span style="margin-left:.4rem; font-size:.75em; padding:.1rem .35rem; border-radius:.35rem; background:rgba(255,255,255,.2); color:#fff; border:1px solid rgba(255,255,255,.35);">Administrateur</span>
+            {% endif %}
+          </span>
+        {% else %}
+          <em>Aucun membre pour le moment.</em>
+        {% endfor %}
+      </div>
+    </article>
+
+    {% if newFamilyForm and not ownsOne %}
+      <details style="margin:.75rem 0;">
+        <summary class="btn">Créer une nouvelle famille</summary>
+        <div style="margin-top:.5rem;">
+          {{ form_start(newFamilyForm) }}
+            {{ form_row(newFamilyForm.name) }}
+            {{ form_row(newFamilyForm.submit) }}
+          {{ form_end(newFamilyForm) }}
+        </div>
+      </details>
+    {% endif %}
+
+    <h3>Inviter un proche</h3>
+    {{ form_start(inviteForm) }}
+      {{ form_row(inviteForm.email) }}
+      {{ form_row(inviteForm.submit) }}
+    {{ form_end(inviteForm) }}
+
+    <h3>Discussions</h3>
+    <div class="chat-box" id="chatBox">
+    <ul style="margin:0; padding-left:1rem; list-style:disc;">
+      {% for m in family.messages|slice(-10) %}
+        <li>
+          <div style="display:flex; align-items:center; gap:.5rem;">
+            <div style="flex:1 1 auto;">
+              <strong>{{ m.author ? m.author.firstName : 'Anonyme' }}</strong> — {{ m.createdAt|date('d/m H:i') }}
+            </div>
+            {% if app.user and (is_granted('ROLE_ADMIN') or (family.owner and family.owner.id == app.user.id)) %}
+              <form method="post" action="{{ path('message_delete', {id: m.id}) }}" onsubmit="return confirm('Supprimer ce message ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete_message_' ~ m.id) }}">
+                <button class="btn danger" type="submit" style="padding:.15rem .5rem; font-size:.85em;">Supprimer</button>
+              </form>
+            {% endif %}
+          </div>
+          <div>
+            {{ m.content }}
+          </div>
+          {% if m.imagePath %}<div><img src="{{ m.imagePath }}" alt="image" style="max-width:240px; height:auto;"></div>{% endif %}
+        </li>
+      {% else %}
+        <li>Aucun message pour l'instant.</li>
+      {% endfor %}
+    </ul>
+    </div>
+    {% if messageForm %}
+      {{ form_start(messageForm) }}
+        {{ form_row(messageForm.content) }}
+        {{ form_row(messageForm.image) }}
+        {{ form_row(messageForm.submit) }}
+      {{ form_end(messageForm) }}
+    {% endif %}
+
+    <h3>Galerie photos</h3>
+    {% set total = gallery|length %}
+    <p><small>
+      {{ total }} image{{ total > 1 ? 's' : '' }} au total.
+      Au-delà de 50 images, un abonnement sera requis (disponible dans la prochaine version).
+      Taille maximale par image: 10 Mo.
+    </small></p>
+    <div style="margin:.5rem 0;">
+      {{ form_start(photoForm, { 'attr': { 'enctype': 'multipart/form-data' } }) }}
+        <div style="display:flex; gap:.5rem; align-items:end; flex-wrap:wrap;">
+          <div style="min-width:260px;">{{ form_row(photoForm.image) }}</div>
+          <div style="flex:1; min-width:260px;">{{ form_row(photoForm.caption) }}</div>
+          <div>{{ form_row(photoForm.submit) }}</div>
+        </div>
+      {{ form_end(photoForm) }}
+    </div>
+
+    <style>
+      .gallery { display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:10px; }
+      .thumb { position:relative; border:2px solid #fff; border-radius:.5rem; overflow:hidden; background:#fff; cursor: zoom-in; }
+      .thumb img { width:100%; height:140px; object-fit:cover; display:block; }
+      .thumb .overlay { position:absolute; inset:0; background:rgba(0,0,0,.62); color:#fff; padding:.5rem; font-size:.85em; opacity:0; transition:opacity .18s ease-in-out; display:flex; flex-direction:column; justify-content:flex-end; }
+      .thumb:hover .overlay { opacity:1; }
+      /* Lightbox */
+      .lightbox { position:fixed; inset:0; background:rgba(0,0,0,.92); display:none; z-index:9999; }
+      .lightbox.open { display:flex; align-items:center; justify-content:center; }
+      .lightbox .content { position:relative; width:90vw; height:90vh; display:flex; align-items:center; justify-content:center; }
+      .lightbox img { max-width:100%; max-height:100%; object-fit:contain; }
+      .lightbox .close { position:absolute; top:16px; right:16px; background:transparent; border:0; color:#fff; font-size:2rem; line-height:1; cursor:pointer; }
+      .lightbox .caption { position:absolute; left:0; right:0; bottom:0; background:rgba(0,0,0,.8); color:#fff; padding:.6rem .9rem; font-size:.95rem; }
+      @media (max-width: 768px) {
+        .gallery { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap:8px; }
+        .thumb img { height:110px; }
+      }
+    </style>
+    <div class="gallery">
+      {% for p in gallery %}
+        <div class="thumb" data-src="{{ p.path }}" data-caption="{{ p.caption|default('')|e('html_attr') }}" data-delete="{{ path('photo_delete', {id: p.id}) }}" data-token="{{ csrf_token('delete_photo_' ~ p.id) }}" role="button" tabindex="0" aria-label="Voir la photo en grand">
+          <img src="{{ p.path }}" alt="photo">
+          <div class="overlay">
+            {% if p.caption %}<div style="margin-bottom:.25rem;">{{ p.caption }}</div>{% endif %}
+            <div style="opacity:.85; font-size:.8em;">par {{ p.author ? p.author.firstName ~ ' ' ~ p.author.lastName|upper : '—' }}, le {{ p.createdAt|date('d/m/Y H:i') }}</div>
+          </div>
+        </div>
+      {% else %}
+        <em>Aucune photo pour l’instant.</em>
+      {% endfor %}
+    </div>
+
+    <!-- Lightbox overlay -->
+    <div id="lightbox" class="lightbox" aria-hidden="true">
+      <div class="content">
+        <button class="close" type="button" aria-label="Fermer">×</button>
+        <img src="" alt="Photo en grand">
+        <div class="caption"></div>
+        <form id="deletePhotoForm" method="post" action="#" style="position:absolute; right:16px; bottom:16px;">
+          <input type="hidden" name="_token" value="">
+          <button type="submit" class="btn danger" style="background:#e53935; border:1px solid #e53935; color:#fff; padding:.45rem .8rem; border-radius:.5rem;">Supprimer</button>
+        </form>
+      </div>
+    </div>
+
+    {% block javascripts %}
+      {{ parent() }}
+      <script>
+        (function () {
+          const lb = document.getElementById('lightbox');
+          if (!lb) return;
+          const img = lb.querySelector('img');
+          const cap = lb.querySelector('.caption');
+          const closeBtn = lb.querySelector('.close');
+          const delForm = document.getElementById('deletePhotoForm');
+          function openLb(src, caption) {
+            img.src = src || '';
+            cap.textContent = caption || '';
+            lb.classList.add('open');
+            lb.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+          }
+          function closeLb() {
+            lb.classList.remove('open');
+            lb.setAttribute('aria-hidden', 'true');
+            img.src = '';
+            cap.textContent = '';
+            document.body.style.overflow = '';
+          }
+          document.querySelectorAll('.gallery .thumb').forEach(function (el) {
+            el.addEventListener('click', function (e) {
+              e.preventDefault();
+              const src = el.getAttribute('data-src') || (el.querySelector('img') ? el.querySelector('img').src : '');
+              const caption = el.getAttribute('data-caption') || '';
+              // prepare delete form
+              const del = el.getAttribute('data-delete') || '#';
+              const tok = el.getAttribute('data-token') || '';
+              if (delForm) {
+                delForm.action = del;
+                const input = delForm.querySelector('input[name="_token"]');
+                if (input) input.value = tok;
+              }
+              openLb(src, caption);
+            });
+            el.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
+            });
+          });
+          closeBtn.addEventListener('click', closeLb);
+          lb.addEventListener('click', function (e) { if (e.target === lb) closeLb(); });
+          window.addEventListener('keydown', function (e) { if (e.key === 'Escape' && lb.classList.contains('open')) closeLb(); });
+        })();
+        (function () {
+          var box = document.getElementById('chatBox');
+          if (box) { box.scrollTop = box.scrollHeight; }
+        })();
+      </script>
+    {% endblock %}
+
+    <h3>Événements du mois</h3>
+    {% set mois = ['', 'janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'] %}
+    <p><small>{{ mois[currentMonth|date('n')] }} {{ currentMonth|date('Y') }}</small></p>
+    <ul>
+      {% set monthNum = currentMonth|date('n') %}
+      {% for e in monthEvents %}
+        {% set show = true %}
+        {% if e.recurrence == constant('App\\Entity\\Event::RECURRENCE_YEARLY') %}
+          {% if e.startAt|date('n') != monthNum %}
+            {% set show = false %}
+          {% endif %}
+        {% endif %}
+        {% if show %}
+          <li>
+            <strong>{{ e.title }}</strong> — {{ e.startAt|date('d/m H:i') }}
+            {% if e.recurrence == constant('App\\Entity\\Event::RECURRENCE_YEARLY') %}<em>(annuel)</em>{% endif %}
+          </li>
+        {% endif %}
+      {% else %}
+        <li>Aucun événement ce mois-ci.</li>
+      {% endfor %}
+    </ul>
+  {% elseif familyForm %}
+    <p>Vous n'avez pas encore de famille. Créez-la :</p>
+    {{ form_start(familyForm) }}
+      {{ form_row(familyForm.name) }}
+      {{ form_row(familyForm.submit) }}
+    {{ form_end(familyForm) }}
+  {% else %}
+    {% if is_granted('ROLE_ADMIN') %}
+      <p>Mode administrateur: sélectionnez une famille dans l'interface Admin.</p>
+      <p><a class="btn" href="{{ path('admin_home') }}">Aller à l'administration</a></p>
+    {% endif %}
+  {% endif %}
+
+  {% if family and app.user and (family.owner and family.owner.id == app.user.id or is_granted('ROLE_ADMIN')) %}
+    <hr>
+    <h3>Gestion de la famille</h3>
+    <form method="post" action="{{ path('family_add_member', {id: family.id}) }}">
+      <input type="hidden" name="_token" value="{{ csrf_token('add_member_' ~ family.id) }}">
+      <label>Ajouter un membre par email
+        <input type="email" name="email" required placeholder="email@exemple.com">
+      </label>
+      <button type="submit">Ajouter</button>
+    </form>
+    <form method="post" action="{{ is_granted('ROLE_ADMIN') ? path('admin_family_change_owner', {id: family.id}) : path('family_change_owner', {id: family.id}) }}" style="margin-top:.5rem; display:flex; gap:.5rem; align-items:end; flex-wrap:wrap;">
+      <input type="hidden" name="_token" value="{{ csrf_token((is_granted('ROLE_ADMIN') ? 'admin_change_owner_' : 'family_change_owner_') ~ family.id) }}">
+      <label>Choisir un nouveau propriétaire
+        <select name="new_owner_id" required>
+          {% for m in family.members %}
+            <option value="{{ m.id }}" {% if family.owner and m.id == family.owner.id %}disabled{% endif %}>{{ m.firstName }} {{ m.lastName|upper }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button class="btn" type="submit">Définir comme propriétaire</button>
+    </form>
+    <form method="post" action="{{ path('family_delete', {id: family.id}) }}" onsubmit="return confirm('Supprimer la famille ? Cette action est irréversible.');" style="margin-top:.5rem;">
+      <input type="hidden" name="_token" value="{{ csrf_token('delete_family_' ~ family.id) }}">
+      <button type="submit" style="background:#e53935; color:#fff; border:1px solid #e53935; border-radius:.4rem; padding:.35rem .6rem;">Supprimer la famille</button>
+    </form>
+  {% endif %}
+{% endblock %}

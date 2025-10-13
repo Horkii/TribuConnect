@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}TribuConnect{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <style>
+      header.container { margin-top: 1rem; }
+      nav a { margin-right: .5rem; }
+      .container { max-width: 1280px; }
+      .dropdown { position: relative; }
+      .dropdown > ul { position:absolute; background:#fff; border:1px solid #e0e4ea; padding:.5rem; border-radius:.4rem; list-style:none; display:none; min-width:200px; }
+      .dropdown:hover > ul { display:block; }
+      .brand { text-align:center; margin-bottom:.5rem; }
+      .brand img { max-height:160px; display:block; margin:0 auto .25rem; background: transparent; }
+      .brand a { text-decoration:none; color:inherit; font-size:1.4rem; font-weight:700; }
+      header nav > ul { display:flex; gap:1rem; flex-wrap:nowrap; justify-content:center; white-space:nowrap; width:100%; }
+    </style>
+  </head>
+  <body>
+    <header class="container">
+      <div class="brand">
+        <a href="{{ path('homepage') }}">
+          <img src="{{ asset('logo.svg') }}" alt="TribuConnect" />
+          </a>
+      </div>
+      <nav>
+        <ul class="links">
+          <li><a href="{{ path('homepage') }}">Accueil</a></li>
+          <li><a href="{{ path('contact') }}">Contact</a></li>
+          {% if app.user %}
+            {% set famCount = app.user.families is defined ? app.user.families|length : 0 %}
+            {% if famCount > 1 %}
+              <li class="dropdown">
+                <a href="{{ path('family_home') }}">Mes familles &#9662;</a>
+                <ul>
+                  {% for f in app.user.families %}
+                    <li><a href="{{ path('family_home', {fid: f.id}) }}">{{ f.name }}</a></li>
+                  {% endfor %}
+                </ul>
+              </li>
+            {% else %}
+              <li><a href="{{ path('family_home') }}">Ma famille</a></li>
+            {% endif %}
+            <li><a href="{{ path('calendar_home') }}">Calendrier</a></li>
+            <li><a href="{{ path('profile_home') }}">Mon profil</a></li>
+            <li><a href="{{ path('app_logout') }}">Déconnexion</a></li>
+          {% else %}
+            <li><a href="{{ path('app_login') }}">Se connecter</a></li>
+            <li><a href="{{ path('app_register') }}">S'inscrire</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </header>
+    <main class="container">
+      {% for label, messages in app.flashes %}
+        {% for message in messages %}
+          <article class="{{ label }}">{{ message }}</article>
+        {% endfor %}
+      {% endfor %}
+      {% block body %}{% endblock %}
+    </main>
+    {% block javascripts %}{% endblock %}
+  </body>
+  </html>
+
+
+
+

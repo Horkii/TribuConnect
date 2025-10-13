@@ -1,0 +1,49 @@
+homepage:
+  path: /
+  controller: App\Controller\HomeController::index
+
+app_login:
+  path: /connexion
+  controller: App\Controller\SecurityController::login
+
+app_logout:
+  path: /deconnexion
+  controller: App\Controller\SecurityController::logout
+
+app_register:
+  path: /inscription
+  controller: App\Controller\SecurityController::register
+
+contact:
+  path: /contact
+  controller: App\Controller\ContactController::index
+
+family_home:
+  path: /famille
+  controller: App\Controller\FamilyController::index
+
+calendar_home:
+  path: /calendrier
+  controller: App\Controller\CalendarController::index
+
+profile_home:
+  path: /profil
+  controller: App\Controller\ProfileController::index
+
+health:
+  path: /health
+  controller: App\Controller\HomeController::health
+
+profile_delete:
+  path: /profil/supprimer
+  controller: App\Controller\ProfileController::delete
+  methods: [POST]
+
+photos_home:
+  path: /photos
+  controller: App\Controller\PhotoController::index
+
+# Import attribute routes defined in controllers (e.g., invitation accept)
+controllers:
+  resource: ../src/Controller/
+  type: attribute

@@ -1,0 +1,67 @@
+
+Current configuration for extension with alias "doctrine"
+=========================================================
+
+doctrine:
+    dbal:
+        default_connection: default
+        connections:
+            default:
+                url: '%env(resolve:DATABASE_URL)%'
+                charset: utf8
+                driver: pdo_mysql
+                logging: true
+                profiling: true
+                profiling_collect_backtrace: false
+                profiling_collect_schema_errors: true
+                idle_connection_ttl: 600
+                options: {  }
+                mapping_types: {  }
+                default_table_options: {  }
+                schema_manager_factory: doctrine.dbal.legacy_schema_manager_factory
+                slaves: {  }
+                replicas: {  }
+        types: {  }
+        driver_schemes: {  }
+    orm:
+        auto_generate_proxy_classes: true
+        default_entity_manager: default
+        entity_managers:
+            default:
+                connection: default
+                naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+                mappings:
+                    App:
+                        is_bundle: false
+                        type: attribute
+                        dir: /var/www/html/src/Entity
+                        prefix: App\\Entity
+                        alias: App
+                        mapping: true
+                query_cache_driver:
+                    type: null
+                result_cache_driver:
+                    type: null
+                class_metadata_factory_name: Doctrine\ORM\Mapping\ClassMetadataFactory
+                default_repository_class: Doctrine\ORM\EntityRepository
+                auto_mapping: false
+                quote_strategy: doctrine.orm.quote_strategy.default
+                typed_field_mapper: doctrine.orm.typed_field_mapper.default
+                entity_listener_resolver: null
+                repository_factory: doctrine.orm.container_repository_factory
+                schema_ignore_classes: {  }
+                report_fields_where_declared: false
+                validate_xml_mapping: false
+                hydrators: {  }
+                filters: {  }
+                identity_generation_preferences: {  }
+        enable_lazy_ghost_objects: false
+        enable_native_lazy_objects: false
+        proxy_dir: /var/www/html/var/cache/dev/doctrine/orm/Proxies
+        proxy_namespace: Proxies
+        controller_resolver:
+            enabled: true
+            auto_mapping: null
+            evict_cache: false
+        resolve_target_entities: {  }
+

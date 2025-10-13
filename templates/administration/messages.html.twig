@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration • Messages de contact{% endblock %}
+{% block page_hero_title %}<h1>Messages de contact</h1>{% endblock %}
+{% block page_hero_description %}<p>Modération et suivi des messages envoyés à support@tribuconnect.fr</p>{% endblock %}
+
+{% block body %}
+  <table>
+    <thead><tr><th>Date</th><th>De</th><th>Statut</th><th>Voir</th></tr></thead>
+    <tbody>
+      {% for m in messages %}
+        <tr>
+          <td>{{ m.createdAt|date('d/m/Y H:i') }}</td>
+          <td>{{ m.fromEmail }}</td>
+          <td>{{ m.status }}</td>
+          <td><a class="btn" href="{{ path('admin_message_show', {id: m.id}) }}">Ouvrir</a></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4"><em>Aucun message</em></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+

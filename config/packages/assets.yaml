@@ -1,0 +1,5 @@
+framework:
+  assets:
+    # Ajoute ?v=... à toutes les URLs générées par {{ asset() }}
+    version: '%env(APP_ASSET_VERSION)%'
+

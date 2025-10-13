@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Données personnelles (RGPD) • TribuConnect{% endblock %}
+
+{% block body %}
+  <h1>Gestion des données personnelles (RGPD)</h1>
+  <p>Dernière mise à jour: 13/10/2025</p>
+
+  <h3>1. Responsable du traitement</h3>
+  <p>TribuConnect — Contact: <a href="mailto:support@tribuconnect.fr">support@tribuconnect.fr</a></p>
+
+  <h3>2. Données traitées</h3>
+  - Identité: prénom, nom, email, mot de passe (haché), date de création du compte.
+  - Données de famille: nom de la famille, invitations (email, statut), messages, événements, photos (fichiers et légendes).
+  - Journaux techniques (logs) pour sécurité et débogage.
+
+  <h3>3. Finalités et bases légales</h3>
+  - Fourniture du service (exécution du contrat): gestion des familles, calendrier, messagerie, galerie.
+  - Sécurité et prévention des abus (intérêt légitime).
+  - Envoi d’emails d’invitation et notifications (exécution du contrat/intérêt légitime).
+
+  <h3>4. Durées de conservation</h3>
+  - Compte: durée d’utilisation + 24 mois d’inactivité.
+  - Contenus (messages, photos, événements): jusqu’à suppression par un membre autorisé ou suppression du compte/famille.
+  - Logs: 6 à 12 mois selon finalités de sécurité.
+
+  <h3>5. Destinataires et sous-traitants</h3>
+  - Hébergement et base de données: infrastructure de l’application.
+  - Email: service SMTP. En développement, les messages sont interceptés par Mailhog (aucun envoi externe).
+
+  <h3>6. Transferts hors UE</h3>
+  - Pas de transferts hors UE/EEE prévus, sauf mention contraire dans une mise à jour de cette politique.
+
+  <h3>7. Droits des personnes</h3>
+  - Accès, rectification, effacement, limitation, opposition, portabilité.
+  - Exercer vos droits: <a href="mailto:support@tribuconnect.fr">support@tribuconnect.fr</a>. Réponse sous 30 jours.
+
+  <h3>8. Sécurité</h3>
+  - Mots de passe hachés, contrôle d’accès, sauvegardes raisonnables et mises à jour de sécurité.
+  - Les membres de chaque famille contrôlent qui accède aux contenus partagés.
+
+  <h3>9. Cookies et traceurs</h3>
+  - Cookies techniques nécessaires au fonctionnement (authentification, préférences). Pas de ciblage publicitaire.
+
+  <h3>10. Mineurs</h3>
+  - Le service s’adresse aux familles; les responsables légaux doivent superviser l’utilisation par les mineurs.
+
+  <h3>11. Modifications</h3>
+  - Cette politique peut évoluer. En cas de changement significatif, une information sera fournie.
+{% endblock %}

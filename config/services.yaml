@@ -1,0 +1,19 @@
+parameters:
+  locale: 'fr'
+  app.mail_from: 'noreply@tribuconnect.local'
+
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  App\:
+    resource: '../src/'
+    exclude:
+      - '../src/DependencyInjection/'
+      - '../src/Entity/'
+      - '../src/Kernel.php'
+
+  App\Service\VisitCounter:
+    arguments:
+      $redisUrl: '%env(REDIS_URL)%'

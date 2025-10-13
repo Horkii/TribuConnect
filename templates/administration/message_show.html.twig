@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration • Message #{{ m.id }}{% endblock %}
+{% block page_hero_title %}<h1>Message de {{ m.fromEmail }}</h1>{% endblock %}
+{% block page_hero_description %}<p>Reçu le {{ m.createdAt|date('d/m/Y H:i') }}</p>{% endblock %}
+
+{% block body %}
+  <article class="card">
+    <h3 style="margin-top:0;">Contenu</h3>
+    <pre style="white-space:pre-wrap;">{{ m.body }}</pre>
+    <h3>Répondre</h3>
+    <form method="post" action="{{ path('admin_message_reply', {id: m.id}) }}" style="margin:.5rem 0; display:flex; flex-direction:column; gap:.5rem;">
+      <input type="hidden" name="_token" value="{{ csrf_token('admin_message_reply_' ~ m.id) }}">
+      <label>Objet
+        <input type="text" name="subject" placeholder="Réponse — Service modération TribuConnect">
+      </label>
+      <label>Message
+        <textarea name="reply" rows="6" required placeholder="Votre réponse au demandeur..."></textarea>
+      </label>
+      <div>
+        <button class="btn" type="submit">Envoyer la réponse</button>
+      </div>
+    </form>
+    <form method="post" action="{{ path('admin_message_status', {id: m.id}) }}" style="margin-top:.5rem; display:flex; gap:.5rem; align-items:center;">
+      <input type="hidden" name="_token" value="{{ csrf_token('admin_message_status_' ~ m.id) }}">
+      <label>Statut
+        <select name="status">
+          {% for s in ['new','in_progress','closed'] %}
+            <option value="{{ s }}" {% if m.status == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button class="btn" type="submit">Mettre à jour</button>
+      <a class="btn" href="{{ path('admin_messages') }}">← Retour</a>
+    </form>
+  </article>
+{% endblock %}

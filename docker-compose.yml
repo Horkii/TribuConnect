@@ -1,0 +1,63 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: tribuconnect_app
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: '1'
+      APP_SECRET: 2f3f5b2a1c7e4c9e9d8c7b6a5f4e3d2c
+      TZ: Europe/Paris
+      APP_TIMEZONE: Europe/Paris
+      DATABASE_URL: postgresql://tribu:tribu@db:5432/tribu?serverVersion=16&charset=utf8
+      MAILER_DSN: smtp://mailhog:1025
+      REDIS_URL: redis://redis:6379
+    volumes:
+      - ./:/var/www/html
+      - app_vendor:/var/www/html/vendor
+      - app_var:/var/www/html/var
+    ports:
+      - "8080:80"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      mailhog:
+        condition: service_started
+
+  db:
+    image: postgres:16
+    container_name: tribuconnect_db
+    environment:
+      POSTGRES_DB: tribu
+      POSTGRES_USER: tribu
+      POSTGRES_PASSWORD: tribu
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tribu -d tribu"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    container_name: tribuconnect_redis
+    ports:
+      - "6379:6379"
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: tribuconnect_mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+
+volumes:
+  app_vendor:
+  app_var:
+  pg_data:

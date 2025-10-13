@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon profil • TribuConnect{% endblock %}
+
+{% block body %}
+  <h1>Mon profil</h1>
+  {{ form_start(profileForm) }}
+    {{ form_row(profileForm.firstName) }}
+    {{ form_row(profileForm.lastName) }}
+    {{ form_row(profileForm.age) }}
+    {{ form_row(profileForm.email) }}
+    {{ form_row(profileForm.postalCode) }}
+    {{ form_row(profileForm.cityOrRegion) }}
+    {{ form_row(profileForm.submit) }}
+  {{ form_end(profileForm) }}
+
+  {% if app.user and 'ROLE_ADMIN' not in app.user.roles %}
+    <hr>
+    <button class="btn danger" type="button" id="btnDeleteAccount">Supprimer mon compte</button>
+    <style>
+      .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; padding: 1rem; z-index: 9999; }
+      .modal-backdrop.open { display: flex; }
+      .modal-panel { background: #fff; border-radius: .6rem; max-width: 520px; width: 100%; padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.35); text-align: center; }
+    </style>
+    <div id="confirmDelete" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="modal-panel">
+        <h3 style="margin:.25rem 0 0;">Confirmer la suppression</h3>
+        <p style="margin:.75rem 0;">Cette action est définitive et aucune récupération ne sera possible.<br>Pensez à transférer la propriété de vos familles avant de continuer pour éviter leur suppression.</p>
+        <form method="post" action="{{ path('profile_delete') }}" style="margin-top:.75rem; display:flex; flex-direction:column; gap:.5rem; align-items:center; width:100%;">
+          <input type="hidden" name="_token" value="{{ csrf_token('delete_account') }}">
+          <button type="button" id="cancelDelete" style="display:inline-block; padding:.5rem 1rem;">Annuler</button>
+          <button class="btn danger" type="submit" style="display:inline-block; padding:.5rem 1rem; width:auto; min-width:unset; background:#e53935; border:1px solid #e53935; color:#fff;">Je confirme, supprimer</button>
+        </form>
+      </div>
+    </div>
+    {% block javascripts %}
+      {{ parent() }}
+      <script>
+        (function(){
+          var btn = document.getElementById('btnDeleteAccount');
+          var backdrop = document.getElementById('confirmDelete');
+          var cancel = document.getElementById('cancelDelete');
+          if (!btn || !backdrop || !cancel) return;
+          function open() { backdrop.classList.add('open'); backdrop.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+          function close() { backdrop.classList.remove('open'); backdrop.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+          btn.addEventListener('click', open);
+          cancel.addEventListener('click', close);
+          backdrop.addEventListener('click', function(e){ if (e.target === backdrop) close(); });
+          window.addEventListener('keydown', function(e){ if (e.key === 'Escape' && backdrop.classList.contains('open')) close(); });
+        })();
+      </script>
+    {% endblock %}
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,19 @@
+doctrine:
+  dbal:
+    url: '%env(resolve:DATABASE_URL)%'
+    charset: utf8
+    default_connection: default
+  orm:
+    auto_generate_proxy_classes: true
+    default_entity_manager: default
+    entity_managers:
+      default:
+        connection: default
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        mappings:
+          App:
+            is_bundle: false
+            type: attribute
+            dir: '%kernel.project_dir%/src'
+            prefix: 'App'
+            alias: App

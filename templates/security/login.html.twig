@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion • TribuConnect{% endblock %}
+
+{% block body %}
+  <h1>Se connecter</h1>
+  {% if error %}
+    <article class="error">{{ error.messageKey|trans(error.messageData, 'security') }}</article>
+  {% endif %}
+  <form method="post" action="{{ path('app_login') }}">
+    <label>Email
+      <input type="email" name="_username" value="{{ last_username }}" required autocomplete="email">
+    </label>
+    <label>Mot de passe
+      <input type="password" name="_password" required autocomplete="current-password">
+    </label>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+    <button type="submit">Connexion</button>
+  </form>
+{% endblock %}
+

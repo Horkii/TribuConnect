@@ -1,0 +1,17 @@
+framework:
+  default_locale: 'fr'
+  secret: '%env(APP_SECRET)%'
+  csrf_protection: true
+  http_method_override: true
+  session:
+    handler_id: null
+    cookie_secure: auto
+    cookie_samesite: lax
+  translator:
+    default_path: '%kernel.project_dir%/translations'
+    fallbacks: ['fr']
+  form: true
+  validation: { enable_annotations: true }
+  assets: ~
+  router:
+    utf8: true

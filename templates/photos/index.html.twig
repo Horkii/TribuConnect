@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Album photo • TribuConnect{% endblock %}
+
+{% block body %}
+  <h1>Album photo familial</h1>
+  {{ form_start(uploadForm, {'attr': {'enctype': 'multipart/form-data'}}) }}
+    {{ form_row(uploadForm.event) }}
+    {{ form_row(uploadForm.file) }}
+    {{ form_row(uploadForm.submit) }}
+  {{ form_end(uploadForm) }}
+
+  <hr>
+  <div style="display:grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap:12px;">
+    {% for p in photos %}
+      <figure>
+        <img src="{{ p.path }}" alt="photo" style="width:100%; height:auto;"/>
+      </figure>
+    {% else %}
+      <p>Aucune photo pour l'instant.</p>
+    {% endfor %}
+  </div>
+{% endblock %}
+

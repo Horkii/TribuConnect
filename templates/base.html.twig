@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}TribuConnect — Calendrier familial partagé et gestion de tribu{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Organisez votre tribu avec un calendrier familial partagé, des événements, des photos et des invitations. TribuConnect facilite l'organisation familiale et le partage entre proches.{% endblock %}">
+    {# Favicon et icônes #}
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('TribuConnect.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('TribuConnect.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('TribuConnect.png') }}">
+    <meta name="theme-color" content="#0A369D">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    {# OpenGraph / Twitter pour l'aperçu (Google peut aussi s'en servir) #}
+    {% set ogImage = (app.request is defined and app.request) ? app.request.schemeAndHttpHost ~ asset('TribuConnect.png') : asset('TribuConnect.png') %}
+    <meta property="og:title" content="{% block og_title %}TribuConnect — Calendrier familial et organisation de votre tribu{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Gérez votre calendrier de famille, organisez vos événements et rassemblez votre tribu: invitations, photos et discussions privées.{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{{ ogImage }}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{% block twitter_title %}TribuConnect — Calendrier familial et tribu{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Planifiez la vie de famille avec un calendrier partagé, des photos et des messages pour votre tribu.{% endblock %}">
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "TribuConnect",
+      "url": "{{ (app.request is defined and app.request) ? app.request.schemeAndHttpHost : '' }}",
+      "description": "Calendrier familial partagé et outils pour organiser votre tribu: événements, photos, invitations.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "{{ (app.request is defined and app.request) ? app.request.schemeAndHttpHost : '' }}/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    <meta name="twitter:image" content="{{ ogImage }}">
+    <style>
+      header.container { margin-top: 1rem; }
+      body { font-family: 'Roboto', system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif; }
+      nav a { margin-right: .5rem; }
+      .container { max-width: 1280px; }
+      .dropdown { position: relative; }
+      .dropdown > ul { position:absolute; background:#fff; border:1px solid #e0e4ea; padding:.5rem; border-radius:.4rem; list-style:none; display:none; min-width:200px; }
+      .dropdown:hover > ul { display:block; }
+      .brand { text-align:center; margin-bottom:.5rem; }
+      .brand .brand-logo { display:block; margin:0 auto .25rem; background:transparent !important; border:0 !important; box-shadow:none !important; }
+      .brand .brand-logo img { max-height:120px; height:auto; width:auto; object-fit:contain; object-position:center; display:block; margin:0 auto; background:transparent !important; border:0 !important; box-shadow:none !important; }
+      .brand a { text-decoration:none; color:inherit; font-size:1.4rem; font-weight:700; display:inline-block; }
+      /* Barre de navigation */
+      .nav-wrap { display:flex; align-items:center; justify-content:center; position:relative; }
+      .nav-toggle { display:none; background:transparent; border:0; padding:.4rem; margin-right:.25rem; cursor:pointer; }
+      .nav-toggle .bar { display:block; width:24px; height:3px; background:#0A369D; margin:4px 0; border-radius:2px; }
+      .nav-menu { flex:1 1 auto; }
+      header nav > .nav-menu > ul { display:flex; gap:0; flex-wrap:nowrap; justify-content:space-between; white-space:nowrap; width:100%; overflow-x:auto; -webkit-overflow-scrolling: touch; padding-bottom:.25rem; list-style:none; margin:0; padding-left:0; }
+      /* Desktop: occuper toute la ligne avec espacement équidistant */
+      @media (min-width: 1025px) {
+        header nav { width:100%; }
+        .nav-wrap { width:100%; }
+        header nav > .nav-menu { width:100%; }
+        header nav .links { display:flex !important; width:100% !important; justify-content: space-between !important; align-items: center !important; gap: 0 !important; flex-wrap: nowrap !important; padding-left: 0 !important; margin: 0 !important; list-style: none !important; }
+        header nav .links > li { flex: 1 1 0 !important; text-align: center !important; }
+        header nav .links > li > a { display: block !important; width: 100% !important; }
+      }
+      /* Backdrop for drawer */
+      .nav-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:9998; }
+      .nav-backdrop.open { display:block; }
+
+      /* Responsive global */
+      @media (max-width: 1024px) {
+        .container { padding-left: .75rem; padding-right: .75rem; }
+        .brand .brand-logo { width:84px; height:84px; }
+        .brand a { font-size:1.2rem; }
+        .nav-wrap { display: flex; align-items: center; justify-content: center; position: relative; }
+        .nav-toggle { display:inline-block; }
+        /* Drawer behavior on mobile */
+        .nav-menu { position:fixed; left:0; top:0; bottom:0; width:260px; max-width:80vw; background:#fff; box-shadow: 2px 0 16px rgba(0,0,0,.2); transform: translateX(-105%); will-change: transform; transition: transform .2s ease-out; z-index:9999; padding:1rem .75rem; display:block; }
+        .nav-menu.open { transform: translateX(0); }
+        header nav > .nav-menu > ul.links { display:flex !important; flex-direction:column !important; flex-wrap:nowrap !important; gap:.5rem; align-items:stretch !important; justify-content:flex-start !important; white-space:normal !important; overflow:auto; max-height: 100%; padding-bottom:0; margin:0; list-style:none; }
+        header nav > .nav-menu > ul.links li { display:block; width:100%; flex:0 0 auto; }
+        header nav > .nav-menu > ul.links li a { display:block; width:100%; padding:.6rem .4rem; text-align:left; }
+        .nav-menu:not(.open) > ul { display:none; }
+        nav a { margin-right: .25rem; }
+      }
+
+      /* Téléphone: forcer 1 élément par ligne dans le menu burger */
+      @media (max-width: 640px) {
+        header nav .links { display:flex !important; flex-direction:column !important; gap:.35rem !important; align-items:stretch !important; }
+        header nav .links > li { display:block !important; width:100% !important; }
+        header nav .links > li > a { display:block !important; width:100% !important; padding:.6rem .4rem; text-align:left; }
+        header nav a { margin-right: 0 !important; }
+      }
+
+      /* Bandeau (hero) global */
+      .global-hero { position:relative; margin: .75rem 0 0; border-radius:.8rem; overflow:hidden; }
+      .global-hero img { width:100%; height:240px; object-fit:cover; display:block; }
+      .global-hero .overlay { position:absolute; inset:0; background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.55)); color:#fff; display:flex; align-items:center; justify-content:center; text-align:center; padding:1rem; }
+      .global-hero .overlay .inner { max-width: 960px; }
+      .global-hero h1 { margin:.1rem 0 .25rem; font-size:1.8rem; }
+      .global-hero p { margin:0; opacity:.95; }
+      @media (max-width: 768px) { .global-hero img { height:180px; } .global-hero h1{ font-size:1.35rem; } }
+    </style>
+  </head>
+  <body>
+    <header class="container">
+      <div class="brand">
+        <a href="{{ path('homepage') }}" class="brand-link">
+          <div class="brand-logo">
+            <img src="{{ asset('TribuConnect.png') }}" alt="TribuConnect" />
+          </div>
+          <div class="brand-name">TribuConnect</div>
+        </a>
+      </div>
+      <nav>
+        <div class="nav-wrap">
+          <button class="nav-toggle" id="navToggle" aria-controls="mainNav" aria-expanded="false" aria-label="Ouvrir le menu">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+          </button>
+          <div class="nav-menu" id="mainNav" role="dialog" aria-modal="true" aria-label="Menu principal">
+            <ul class="links">
+          <li><a href="{{ path('homepage') }}">Accueil</a></li>
+          <li><a href="{{ path('contact') }}">Contact</a></li>
+          {% if app.user %}
+            {% set famCount = app.user.families is defined ? app.user.families|length : 0 %}
+            {% if famCount > 1 %}
+              <li class="dropdown">
+                <a href="{{ path('family_home') }}">Mes familles &#9662;</a>
+                <ul>
+                  {% for f in app.user.families %}
+                    <li><a href="{{ path('family_home', {fid: f.id}) }}">{{ f.name }}</a></li>
+                  {% endfor %}
+                </ul>
+              </li>
+            {% else %}
+              <li><a href="{{ path('family_home') }}">Ma famille</a></li>
+            {% endif %}
+            <li><a href="{{ path('calendar_home') }}">Calendrier</a></li>
+            <li><a href="{{ path('profile_home') }}">Mon profil</a></li>
+            {% if 'ROLE_ADMIN' in app.user.roles %}
+              <li><a href="{{ path('admin_home') }}">Admin</a></li>
+            {% endif %}
+            <li><a href="{{ path('app_logout') }}">Déconnexion</a></li>
+          {% else %}
+            <li><a href="{{ path('app_login') }}">Se connecter</a></li>
+            <li><a href="{{ path('app_register') }}">S'inscrire</a></li>
+          {% endif %}
+            </ul>
+          </div>
+          <div class="nav-backdrop" id="navBackdrop" hidden></div>
+        </div>
+      </nav>
+    </header>
+    <section class="container">
+      <div class="global-hero">
+        <img src="{{ asset('seabird.jpg') }}" alt="Bannière TribuConnect">
+        <div class="overlay">
+          <div class="inner">
+            {% block page_hero_title %}<h1>TribuConnect</h1>{% endblock %}
+            {% block page_hero_description %}<p>Partagez calendrier, photos et discussions en famille.</p>{% endblock %}
+          </div>
+        </div>
+      </div>
+    </section>
+    <main class="container">
+      {% for label, messages in app.flashes %}
+        {% for message in messages %}
+          <article class="{{ label }}">{{ message }}</article>
+        {% endfor %}
+      {% endfor %}
+      {% block body %}{% endblock %}
+  </main>
+    <footer class="container" style="margin-top:2rem; padding:1rem 0; border-top:1px solid #e0e4ea; text-align:center;">
+      <small>
+        <a href="{{ path('legal_terms') }}">Règlement du site</a> ·
+        <a href="{{ path('legal_privacy') }}">Données personnelles (RGPD)</a> ·
+        <a href="mailto:support@tribuconnect.fr">support@tribuconnect.fr</a><br>
+        © 2025 TribuConnect
+      </small>
+    </footer>
+    <script>
+      (function(){
+        var btn = document.getElementById('navToggle');
+        var menu = document.getElementById('mainNav');
+        var backdrop = document.getElementById('navBackdrop');
+        if (!btn || !menu || !backdrop) return;
+        function openDrawer(){ menu.classList.add('open'); backdrop.classList.add('open'); backdrop.hidden = false; btn.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; }
+        function closeDrawer(){ menu.classList.remove('open'); backdrop.classList.remove('open'); backdrop.hidden = true; btn.setAttribute('aria-expanded','false'); document.body.style.overflow=''; }
+        btn.addEventListener('click', function(){ if (menu.classList.contains('open')) closeDrawer(); else openDrawer(); });
+        backdrop.addEventListener('click', closeDrawer);
+        menu.addEventListener('click', function(e){ if (e.target.tagName === 'A') closeDrawer(); });
+        window.addEventListener('keydown', function(e){ if (e.key === 'Escape' && menu.classList.contains('open')) closeDrawer(); });
+      })();
+    </script>
+    {% block javascripts %}{% endblock %}
+  </body>
+  </html>

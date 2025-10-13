@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration • Familles{% endblock %}
+
+{% block body %}
+  <h1>Administration — Familles</h1>
+  <p>
+    <a class="btn" href="{{ path('admin_messages') }}">Voir les messages de contact</a>
+  </p>
+  <form method="get" style="margin:.5rem 0; display:flex; gap:.5rem; align-items:center;">
+    <input type="search" name="q" value="{{ q }}" placeholder="Rechercher une famille par nom" style="flex:1;">
+    <button class="btn">Rechercher</button>
+  </form>
+  <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+  <table>
+    <thead><tr><th>Nom</th><th>Membres</th><th>Propriétaire</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for f in families %}
+      <tr>
+        <td>{{ f.name }}</td>
+        <td>{{ f.members|length }}</td>
+        <td>{{ f.owner ? f.owner.firstName ~ ' ' ~ f.owner.lastName|upper : '—' }}</td>
+        <td><a class="btn" href="{{ path('admin_family', {id: f.id}) }}">Gérer</a></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4"><em>Aucune famille</em></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+{% endblock %}

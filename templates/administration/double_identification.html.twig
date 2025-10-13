@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration • Double identification{% endblock %}
+
+{% block body %}
+  <h1>Double identification (2FA)</h1>
+  <p>Un code de vérification vient de vous être envoyé par SMS. En environnement de dev, si aucun numéro n’est défini, le code est envoyé par email (visible dans Mailhog).</p>
+  <form method="post" action="{{ path('admin_2fa_verify') }}" style="max-width:420px;">
+    <label>Code reçu
+      <input type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required placeholder="000000">
+    </label>
+    <button class="btn" type="submit">Valider</button>
+  </form>
+  <form method="post" action="{{ path('admin_2fa_resend') }}" style="margin-top:.5rem;">
+    <input type="hidden" name="_token" value="{{ csrf_token('admin_2fa_resend') }}">
+    <button class="btn" type="submit">Renvoyer le code</button>
+  </form>
+{% endblock %}
+

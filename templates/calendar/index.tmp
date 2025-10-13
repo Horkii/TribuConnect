@@ -1,0 +1,131 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Calendrier • TribuConnect{% endblock %}
+
+{% block body %}
+  {% set mois = ['', 'janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'] %}
+  <h1>Calendrier — {{ mois[month|date('n')] }} {{ month|date('Y') }}</h1>
+
+  <style>
+    .btn { display:inline-block; text-decoration:none; padding:.45rem .8rem; border:1px solid #cfd4dc; border-radius:.5rem; background:#f6f7f9; color:inherit; }
+    .btn:hover { background:#eef1f5; }
+    .btn.primary { background:#1b6ef3; border-color:#1b6ef3; color:#fff; }
+    .btn.danger { background:#e53935; border-color:#e53935; color:#fff; }
+    .grid-3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; }
+    .grid-7 { display:grid; grid-template-columns: repeat(7, 1fr); gap:12px; }
+    .card { border:1px solid #e0e4ea; border-radius:.6rem; padding:1rem; background:#fff; }
+    .month-grid { display:grid; grid-template-columns: repeat(7, 1fr); gap:6px; }
+    .month-card { display:block; border:1px solid #082a5e; border-radius:.5rem; padding:.6rem; text-decoration:none; color:#fff; background:#0b3d91; }
+    .month-card:hover { background:#0d47a1; }
+    .badge { display:inline-block; padding:.1rem .35rem; border-radius:.35rem; font-size:.75em; }
+    .start { background:#1b6ef3; color:#fff; }
+    .end { background:#e53935; color:#fff; }
+  </style>
+
+  <nav style="margin-bottom: .75rem;">
+    <a class="btn" href="{{ path('calendar_home', {year: prev|date('Y'), month: prev|date('n')}) }}">← Mois précédent</a>
+    <a class="btn" href="{{ path('calendar_home', {year: next|date('Y'), month: next|date('n')}) }}" style="margin-left:.5rem">Mois suivant →</a>
+    <a class="btn" href="{{ path('calendar_home', {view: 'year', year: year}) }}" style="margin-left:.5rem">Année complète</a>
+  </nav>
+
+  {# 1) Affichage du calendrier AVANT le formulaire #}
+
+  {% if view == 'year' %}
+    <section style="margin-top:1rem">
+      <h3>{{ year }}</h3>
+      <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:12px;">
+        {% for m in 1..12 %}
+          <a class="month-card" href="{{ path('calendar_home', {year: year, month: m}) }}">
+            <strong style="display:block; margin-bottom:.35rem;">{{ mois[m] }}</strong>
+            <ul style="margin:0; padding-left:1rem; list-style:none;">
+              {% for e in yearMonths[m] ?? [] %}
+                <li style="font-size:.9em; margin-bottom:.25rem;">
+                  {% set pid = 'pop-y-' ~ m ~ '-' ~ e.id %}
+                  <button class="btn" style="padding:.2rem .5rem; font-size:.85em;" popovertarget="{{ pid }}">{{ e.startAt|date('d') }}: {{ e.title }}</button>
+                  <div id="{{ pid }}" popover style="padding:.6rem; max-width:320px; border:1px solid #cfd4dc; border-radius:.6rem;">
+                    <div style="font-weight:bold; margin-bottom:.25rem;">{{ e.title }}</div>
+                    {% if e.description %}<div style="font-size:.9em;">{{ e.description }}</div>{% endif %}
+                    {% if app.user and (e.createdBy and e.createdBy.id == app.user.id) or (app.user.family and app.user.family.owner and app.user.family.owner.id == app.user.id) %}
+                      <form method="post" action="{{ path('calendar_event_delete', {id: e.id}) }}" onsubmit="return confirm('Supprimer cet événement ?');" style="margin-top:.5rem;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete_event_' ~ e.id) }}">
+                        <button class="btn danger" type="submit">Supprimer</button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </li>
+              {% else %}
+                <li style="font-size:.9em; opacity:.7;">Aucun événement</li>
+              {% endfor %}
+            </ul>
+          </a>
+        {% endfor %}
+      </div>
+      <div style="margin-top:.5rem">
+        <a class="btn" href="{{ path('calendar_home', {view: 'year', year: year - 1}) }}">← Année précédente</a>
+        <a class="btn" href="{{ path('calendar_home', {view: 'year', year: year + 1}) }}" style="margin-left:.5rem">Année suivante →</a>
+        <a class="btn" href="{{ path('calendar_home', {year: month|date('Y'), month: month|date('n')}) }}" style="margin-left:.5rem">Retour mois</a>
+      </div>
+    </section>
+  {% else %}
+    <section style="margin-top:1rem">
+      <h3>{{ mois[month|date('n')] }} {{ month|date('Y') }}</h3>
+      <div class="month-grid">
+        {% set days = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'] %}
+        {% for d in days %}
+          <div style="text-align:center; font-weight:bold;">{{ d }}</div>
+        {% endfor %}
+        {% for w in weeks %}
+          {% for cell in w %}
+            <div style="border:1px solid #ddd; padding:.4rem; min-height:80px; opacity: {{ cell.inMonth ? '1' : '.5' }};">
+              <div style="font-size:.9em; font-weight:bold;">{{ cell.date|date('j') }}</div>
+              <ul style="margin:.25rem 0 0; padding-left:1rem; list-style: none;">
+              {% for e in cell.events %}
+                <li style="font-size:.85em; margin-bottom:.25rem;">
+                  {% set pid = 'pop-m-' ~ e.id %}
+                  <button class="btn" style="padding:.2rem .5rem; font-size:.85em;" popovertarget="{{ pid }}">{{ e.title }}
+                    <span class="badge start">Déb {{ e.startAt|date('d/m H:i') }}</span>
+                    {% if e.endAt %}<span class="badge end">Fin {{ e.endAt|date('d/m H:i') }}</span>{% endif %}
+                  </button>
+                  <div id="{{ pid }}" popover style="padding:.6rem; max-width:320px; border:1px solid #cfd4dc; border-radius:.6rem;">
+                    <div style="font-weight:bold; margin-bottom:.25rem;">{{ e.title }}</div>
+                    {% if e.description %}<div style="font-size:.9em;">{{ e.description }}</div>{% endif %}
+                    <div style="margin-top:.35rem;">
+                      <span class="badge start">Début: {{ e.startAt|date('d/m/Y H:i') }}</span>
+                      {% if e.endAt %}<span class="badge end">Fin: {{ e.endAt|date('d/m/Y H:i') }}</span>{% endif %}
+                    </div>
+                    {% if app.user and (e.createdBy and e.createdBy.id == app.user.id) or (app.user.family and app.user.family.owner and app.user.family.owner.id == app.user.id) %}
+                      <form method="post" action="{{ path('calendar_event_delete', {id: e.id}) }}" onsubmit="return confirm('Supprimer cet événement ?');" style="margin-top:.5rem;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete_event_' ~ e.id) }}">
+                        <button class="btn danger" type="submit">Supprimer</button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </li>
+              {% endfor %}
+              </ul>
+            </div>
+          {% endfor %}
+        {% endfor %}
+      </div>
+  </section>
+  {% endif %}
+
+  {# 2) Formulaire en dessous, compact dans une carte, sur 3 colonnes #}
+  <section style="margin-top:1rem">
+    <div class="card">
+      <h3 style="margin-top:0;">Ajouter un événement</h3>
+      {{ form_start(eventForm) }}
+        <div class="grid-7">
+          <div style="grid-column: span 3;">{{ form_row(eventForm.title) }}</div>
+          <div style="grid-column: span 2;">{{ form_row(eventForm.startAt) }}</div>
+          <div style="grid-column: span 2;">{{ form_row(eventForm.endAt) }}</div>
+          <div style="grid-column: span 2;">{{ form_row(eventForm.recurrence) }}</div>
+          <div style="grid-column: span 5;">{{ form_row(eventForm.description) }}</div>
+        </div>
+        <div style="margin-top:.5rem">
+          <button type="submit" class="btn primary">Créer l'événement</button>
+        </div>
+      {{ form_end(eventForm) }}
+    </div>
+  </section>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin • {{ family.name }}{% endblock %}
+
+{% block body %}
+  <h1>Famille: {{ family.name }}</h1>
+  <p><a class="btn" href="{{ path('admin_home') }}">← Retour à la liste</a></p>
+  <form method="post" action="{{ path('admin_family_delete', {id: family.id}) }}" onsubmit="return confirm('Supprimer définitivement la famille et toutes ses données ?');" style="margin:.5rem 0;">
+    <input type="hidden" name="_token" value="{{ csrf_token('admin_delete_family_' ~ family.id) }}">
+    <button class="btn danger" type="submit">Supprimer la famille</button>
+  </form>
+
+  <h3>Membres</h3>
+  <form method="post" action="{{ path('admin_family_change_owner', {id: family.id}) }}" style="margin:.5rem 0; display:flex; gap:.5rem; align-items:end; flex-wrap:wrap;">
+    <input type="hidden" name="_token" value="{{ csrf_token('admin_change_owner_' ~ family.id) }}">
+    <label>Nouveau propriétaire
+      <select name="new_owner_id" required>
+        {% for m in family.members %}
+          <option value="{{ m.id }}" {% if family.owner and m.id == family.owner.id %}disabled{% endif %}>{{ m.firstName }} {{ m.lastName|upper }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button class="btn" type="submit">Définir</button>
+  </form>
+  <ul>
+    {% for m in family.members %}
+      <li>
+        {{ m.firstName }} {{ m.lastName|upper }}
+        {% if family.owner and m.id == family.owner.id %}<em>(Propriétaire)</em>{% endif %}
+        {% if not (family.owner and m.id == family.owner.id) %}
+          <form method="post" action="{{ path('admin_family_remove_member', {id: family.id, userId: m.id}) }}" style="display:inline;">
+            <input type="hidden" name="_token" value="{{ csrf_token('admin_remove_member_' ~ family.id ~ '_' ~ m.id) }}">
+            <button class="btn danger" onclick="return confirm('Retirer ce membre ?')">Retirer</button>
+          </form>
+        {% endif %}
+      </li>
+    {% else %}
+      <li><em>Aucun membre</em></li>
+    {% endfor %}
+  </ul>
+
+  <h3>Photos</h3>
+  <p>
+    Pour gérer les photos (supprimer), utilisez la page Ma famille: 
+    <a class="btn" href="{{ path('family_home', {fid: family.id}) }}">Ouvrir Ma famille ({{ family.name }})</a>
+  </p>
+
+  <h3>Événements</h3>
+  <p>
+    Pour gérer les événements, utilisez le calendrier: 
+    <a class="btn" href="{{ path('calendar_home', {fid: family.id}) }}">Ouvrir le calendrier ({{ family.name }})</a>
+  </p>
+{% endblock %}
+

@@ -1,0 +1,49 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: tribuconnect_app
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: '0'
+      APP_SECRET: ${APP_SECRET}
+      TZ: Europe/Paris
+      APP_TIMEZONE: Europe/Paris
+      DATABASE_URL: ${DATABASE_URL}
+      MAILER_DSN: ${MAILER_DSN}
+      REDIS_URL: ${REDIS_URL}
+    ports:
+      - "8080:80"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  db:
+    image: postgres:16
+    container_name: tribuconnect_db
+    environment:
+      POSTGRES_DB: tribu
+      POSTGRES_USER: tribu
+      POSTGRES_PASSWORD: tribu
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tribu -d tribu"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    container_name: tribuconnect_redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  pg_data:
+
