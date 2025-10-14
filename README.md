@@ -49,18 +49,7 @@ Exécution locale (sans Docker)
 
 Déploiement (production)
 
-Option A — Railway (le plus simple)
-- Déployez le repo depuis GitHub sur https://railway.app
-- Ajoutez Postgres et Redis managés
-- Variables d’environnement:
-  - `APP_ENV=prod`, `APP_DEBUG=0`, `APP_SECRET=<générez>`
-  - `DATABASE_URL` (fourni par Railway Postgres)
-  - `REDIS_URL` (fourni par Railway Redis)
-  - `MAILER_DSN` (SMTP réel: Brevo/Sendgrid/OVH)
-- Démarrez: le conteneur applique automatiquement les migrations.
-- Attachez votre domaine et testez `/health`.
-
-Option B — VPS avec Docker Compose
+Option — VPS avec Docker Compose
 - Créez un fichier `.env.prod`:
   - `APP_ENV=prod`, `APP_DEBUG=0`, `APP_SECRET=<secret>`
   - `DATABASE_URL=postgresql://tribu:tribu@db:5432/tribu?serverVersion=16&charset=utf8`

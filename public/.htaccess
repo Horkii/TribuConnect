@@ -1,0 +1,15 @@
+<IfModule mod_negotiation.c>
+    Options -MultiViews
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # If the requested filename exists, skip directly
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule . - [L]
+
+    # Otherwise route all requests to front controller
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
