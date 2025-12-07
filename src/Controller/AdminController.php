@@ -9,7 +9,6 @@ use App\Entity\ContactMessage;
 use App\Repository\FamilyRepository;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
-use App\Service\SmsSender;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -195,32 +194,27 @@ class AdminController extends AbstractController
     }
 
     #[Route('/double-identification', name: 'admin_2fa')]
-    public function twoFactor(Request $request, SmsSender $sms, MailerInterface $mailer): Response
+    public function twoFactor(Request $request, MailerInterface $mailer): Response
     {
         $user = $this->getUser(); if (!$user) { return $this->redirectToRoute('app_login'); }
         // Send a new code on GET (if enabled)
         if (method_exists($user, 'isTwoFactorEnabled') && $user->isTwoFactorEnabled()) {
-            $code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            // code aléatoire sur 5 chiffres
+            $code = str_pad((string)random_int(0, 99999), 5, '0', STR_PAD_LEFT);
             if (method_exists($user, 'setTwoFactorCode')) {
                 $user->setTwoFactorCode($code);
                 $user->setTwoFactorExpiresAt(new \DateTimeImmutable('+10 minutes'));
                 $this->em->flush();
             }
-            $sent = false;
-            if (method_exists($user, 'getPhoneNumber') && $user->getPhoneNumber()) {
-                $sms->send($user->getPhoneNumber(), 'Votre code de connexion: '.$code);
-                $sent = true;
-            }
-            if (!$sent) {
-                try {
-                    $email = (new Email())
-                        ->from('security@tribuconnect.local')
-                        ->to($user->getEmail())
-                        ->subject('Votre code de connexion (2FA)')
-                        ->text('Code: '.$code);
-                    $mailer->send($email);
-                } catch (\Throwable) { /* ignore in dev */ }
-            }
+            // envoi du code à l'adresse de contact générique
+            try {
+                $email = (new Email())
+                    ->from('contact@tribuconnect.fr')
+                    ->to('contact@tribuconnect.fr')
+                    ->subject('Code de connexion admin (2FA)')
+                    ->text('Code: '.$code);
+                $mailer->send($email);
+            } catch (\Throwable) { /* ignore en dev */ }
         }
         return $this->render('administration/double_identification.html.twig');
     }
@@ -246,34 +240,29 @@ class AdminController extends AbstractController
     }
 
     #[Route('/double-identification/renvoyer', name: 'admin_2fa_resend', methods: ['POST'])]
-    public function twoFactorResend(Request $request, SmsSender $sms, MailerInterface $mailer): Response
+    public function twoFactorResend(Request $request, MailerInterface $mailer): Response
     {
         $user = $this->getUser(); if (!$user) { return $this->redirectToRoute('app_login'); }
         if (!$this->isCsrfTokenValid('admin_2fa_resend', (string)$request->request->get('_token'))) {
             $this->addFlash('error', 'CSRF invalide.');
             return $this->redirectToRoute('admin_2fa');
         }
-        $code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        // nouveau code sur 5 chiffres
+        $code = str_pad((string)random_int(0, 99999), 5, '0', STR_PAD_LEFT);
         if (method_exists($user, 'setTwoFactorCode')) {
             $user->setTwoFactorCode($code);
             $user->setTwoFactorExpiresAt(new \DateTimeImmutable('+10 minutes'));
             $this->em->flush();
         }
-        $sent = false;
-        if (method_exists($user, 'getPhoneNumber') && $user->getPhoneNumber()) {
-            $sms->send($user->getPhoneNumber(), 'Votre code de connexion: '.$code);
-            $sent = true;
-        }
-        if (!$sent) {
-            try {
-                $email = (new Email())
-                    ->from('security@tribuconnect.local')
-                    ->to($user->getEmail())
-                    ->subject('Votre code de connexion (2FA)')
-                    ->text('Code: '.$code);
-                $mailer->send($email);
-            } catch (\Throwable) { }
-        }
+        // renvoi du code uniquement par email générique
+        try {
+            $email = (new Email())
+                ->from('contact@tribuconnect.fr')
+                ->to('contact@tribuconnect.fr')
+                ->subject('Code de connexion admin (2FA)')
+                ->text('Code: '.$code);
+            $mailer->send($email);
+        } catch (\Throwable) { }
         $this->addFlash('success', 'Un nouveau code vous a été envoyé.');
         return $this->redirectToRoute('admin_2fa');
     }

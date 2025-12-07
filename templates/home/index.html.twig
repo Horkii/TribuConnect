@@ -3,7 +3,7 @@
 {% block title %}Accueil • TribuConnect{% endblock %}
 
 {% block page_hero_title %}<h1>Accueil</h1>{% endblock %}
-{% block page_hero_description %}<p>Rassembler vos proches, simplement: calendrier, événements, photos et discussions.</p>{% endblock %}
+{% block page_hero_description %}<p>Rassembler vos proches, simplement : calendrier, événements, photos et discussions.</p>{% endblock %}
 
 {% block body %}
   <style>
@@ -12,23 +12,36 @@
     @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
   </style>
 
+  <div class="card" style="margin-top:1rem;">
+    <h3 style="margin-top:0;">Passage en alpha 1.1</h3>
+    <p>
+      TribuConnect évolue régulièrement pour rester fidèle à sa promesse : offrir un espace simple
+      et fiable pour organiser la vie familiale. Dans cette version, nous avons surtout travaillé la
+      stabilité du site, la clarté des textes et la sécurité des comptes. Nous avons également mis en place un nouveau calendrier pour les rythmes de travail particuliers.
+    </p>
+  </div>
+
   <div class="grid-2">
     <div class="card">
-      <h3 style="margin-top:0;">Notre raison d'être</h3>
-      <p>Permettre aux familles et aux proches de rester connectés au quotidien. TribuConnect centralise les moments importants: anniversaires, sorties, photos et messages — le tout dans un espace privé et convivial.</p>
+      <h3 style="margin-top:0;">Notre raison d’être</h3>
+      <p>
+        Permettre aux familles et aux proches de rester connectés au quotidien. TribuConnect
+        centralise les moments importants : anniversaires, sorties, photos et messages — le tout
+        dans un espace privé et convivial, sans publicité.
+      </p>
       <ul>
         <li>Planifiez ensemble et évitez les oublis.</li>
         <li>Partagez vos souvenirs en toute simplicité.</li>
-        <li>Favorisez l'organisation et la communication familiale.</li>
+        <li>Favorisez l’organisation et la communication familiale.</li>
       </ul>
     </div>
     <div class="card">
       <h3 style="margin-top:0;">Nos valeurs</h3>
       <ul>
         <li><strong>Confidentialité</strong> — vos données restent privées entre les membres de votre famille.</li>
-        <li><strong>Simplicité</strong> — une interface claire, accessible à tous.</li>
-        <li><strong>Respect</strong> — un cadre bienveillant, modéré, sans publicité.</li>
-        <li><strong>Proximité</strong> — une plateforme pensée pour les liens familiaux.</li>
+        <li><strong>Simplicité</strong> — une interface claire, accessible à tous, même aux moins à l’aise avec le numérique.</li>
+        <li><strong>Respect</strong> — un cadre bienveillant, modéré, sans publicité intrusive.</li>
+        <li><strong>Proximité</strong> — une plateforme pensée pour les liens familiaux du quotidien.</li>
       </ul>
       {% if app.user %}
         <div style="margin-top:.5rem; display:flex; gap:.5rem; flex-wrap:wrap;">
@@ -49,9 +62,41 @@
     <ol>
       <li>Inscrivez-vous et complétez votre profil.</li>
       <li>Créez votre famille et envoyez des invitations par email.</li>
-      <li>Ajoutez des événements (anniversaires récurrents, fêtes…) et des photos.</li>
-      <li>Discutez tous ensemble dans l'espace familial.</li>
+      <li>Ajoutez des événements (anniversaires récurrents, fêtes, sorties) et des photos.</li>
+      <li>Discutez tous ensemble dans l’espace de messages partagé.</li>
     </ol>
-    <p><small>Visites de la page d'accueil: {{ visits }}</small></p>
+    <p><small>Visites de la page d’accueil : {{ visits }}</small></p>
+  </div>
+
+  <div class="card" style="margin-top:1rem;">
+    <h3 style="margin-top:0;">Nouveau calendrier d’horaires de travail</h3>
+    <p>
+      En plus du calendrier familial des événements, TribuConnect propose maintenant un calendrier
+      d’horaires de travail pensé pour les personnes qui ont des rythmes irréguliers : travail en
+      équipes, roulements de nuit, week‑ends travaillés ou repos décalés. Dans l’onglet « Horaires
+      de travail » du calendrier, vous pouvez définir votre propre cycle de travail jusqu’à 21 jours
+      et laisser l’application appliquer automatiquement ce rythme sur tout le mois. Chaque jour du
+      cycle peut être configuré comme « Repos », « Matin », « Après‑midi », « Nuit » ou « Congé », avec
+      un code couleur spécifique pour repérer d’un coup d’œil le type de journée.
+    </p>
+    <p>
+      Concrètement, vous choisissez la longueur de votre cycle (par exemple 7, 14 ou 21 jours) ainsi
+      que la date de début. Vous indiquez ensuite, jour après jour, votre rythme : repos, matin, matin,
+      après‑midi, nuit, etc. Une fois ce rythme enregistré, TribuConnect calcule automatiquement, pour
+      chaque date du calendrier, quel type de journée s’applique. Si une situation particulière se
+      présente (congé exceptionnel, changement de planning de dernière minute), vous pouvez modifier
+      un jour isolé directement depuis la case du calendrier, sans casser l’ensemble du cycle. Ces
+      ajustements sont mémorisés et visibles pour toute la famille concernée.
+    </p>
+    <p>
+      Le calendrier d’horaires de travail a été conçu pour rester confortable à utiliser sur
+      smartphone : sur mobile, les cases sont réorganisées en trois colonnes, les boutons sont plus
+      larges et le texte s’adapte pour rester lisible. Cette fonctionnalité vise à simplifier la vie
+      des familles où les plannings sont complexes : chacun peut voir en un coup d’œil qui travaille,
+      qui est en repos ou en congé, et organiser plus sereinement les sorties, les gardes d’enfants
+      ou les moments de repos. C’est un premier pas vers un suivi plus fin du quotidien, que nous
+      continuerons à améliorer en fonction de vos retours.
+    </p>
   </div>
 {% endblock %}
+

@@ -59,6 +59,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $twoFactorExpiresAt = null;
 
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    private ?string $resetPasswordToken = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $resetPasswordExpiresAt = null;
+
     #[ORM\ManyToMany(targetEntity: Family::class, inversedBy: 'members')]
     #[ORM\JoinTable(name: 'family_user')]
     private \Doctrine\Common\Collections\Collection $families;
@@ -129,4 +135,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getTwoFactorExpiresAt(): ?\DateTimeImmutable { return $this->twoFactorExpiresAt; }
     public function setTwoFactorExpiresAt(?\DateTimeImmutable $at): self { $this->twoFactorExpiresAt = $at; return $this; }
+
+    public function getResetPasswordToken(): ?string { return $this->resetPasswordToken; }
+    public function setResetPasswordToken(?string $token): self { $this->resetPasswordToken = $token; return $this; }
+
+    public function getResetPasswordExpiresAt(): ?\DateTimeImmutable { return $this->resetPasswordExpiresAt; }
+    public function setResetPasswordExpiresAt(?\DateTimeImmutable $at): self { $this->resetPasswordExpiresAt = $at; return $this; }
 }

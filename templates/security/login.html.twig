@@ -17,5 +17,7 @@
     <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
     <button type="submit">Connexion</button>
   </form>
+  <p style="margin-top:.5rem;">
+    <a href="{{ path('app_forgot_password') }}">Mot de passe oublié ?</a>
+  </p>
 {% endblock %}
-
