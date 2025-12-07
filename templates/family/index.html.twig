@@ -9,7 +9,7 @@
       <label>Famille
         <select name="fid" onchange="this.form.submit()">
           {% for f in families %}
-            <option value="{{ f.id }}" {% if family and f.id == family.id %}selected{% endif %}>{{ f.name }}</option>
+            <option value="{{ f.id }}" {% if family and f.id == family.id %}selected{% endif %}>{{ f.name|upper }}</option>
           {% endfor %}
         </select>
       </label>

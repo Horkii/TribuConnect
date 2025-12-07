@@ -140,7 +140,7 @@
       <label>Famille
         <select name="fid" onchange="this.form.submit()">
           {% for f in families %}
-            <option value="{{ f.id }}" {% if currentFamily and f.id == currentFamily.id %}selected{% endif %}>{{ f.name }}</option>
+            <option value="{{ f.id }}" {% if currentFamily and f.id == currentFamily.id %}selected{% endif %}>{{ f.name|upper }}</option>
           {% endfor %}
         </select>
       </label>

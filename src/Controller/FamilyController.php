@@ -33,6 +33,13 @@ class FamilyController extends AbstractController
         if (!$user) { return $this->redirectToRoute('app_login'); }
 
         $families = $user->getFamilies();
+        // liste triée alphabétiquement (par nom) pour le choix par défaut
+        $sortedFamilies = [];
+        foreach ($families as $f) { $sortedFamilies[] = $f; }
+        usort($sortedFamilies, function(Family $a, Family $b) {
+            return strcasecmp((string)$a->getName(), (string)$b->getName());
+        });
+
         $fid = (int)($request->query->get('fid') ?? 0);
         $family = null;
         if ($fid) {
@@ -42,7 +49,7 @@ class FamilyController extends AbstractController
                 $family = $em->getRepository(Family::class)->find($fid);
             }
         }
-        if (!$family && count($families) > 0) { $family = $families->first(); }
+        if (!$family && count($sortedFamilies) > 0) { $family = $sortedFamilies[0]; }
 
         $familyForm = null;
         $inviteForm = null;
