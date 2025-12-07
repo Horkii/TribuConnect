@@ -27,7 +27,7 @@ use Symfony\Component\String\ByteString;
 
 class FamilyController extends AbstractController
 {
-    public function index(Request $request, EntityManagerInterface $em, MailerInterface $mailer, EventRepository $events, PhotoRepository $photos): Response
+    public function index(Request $request, EntityManagerInterface $em, MailerInterface $mailer, EventRepository $events, PhotoRepository $photos, \App\Service\BirthdaySync $birthdaySync): Response
     {
         $user = $this->getUser();
         if (!$user) { return $this->redirectToRoute('app_login'); }
@@ -49,6 +49,9 @@ class FamilyController extends AbstractController
         $messageForm = null;
         $photoForm = null;
         $newFamilyForm = null;
+        $chatPhotoCount = 0;
+        $chatPhotoLimit = 50;
+        $chatPhotoLimitReached = false;
 
         // Allow creating only if user does not already own a family
         $ownsOne = false; foreach ($families as $f) { if ($f->getOwner() && $f->getOwner()->getId() === $user->getId()) { $ownsOne = true; break; } }
@@ -66,6 +69,12 @@ class FamilyController extends AbstractController
                 return $this->redirectToRoute('family_home', ['fid' => $family->getId()]);
             }
         } elseif ($family) {
+            try {
+                $chatPhotoCount = (int)$em->createQuery('SELECT COUNT(m.id) FROM App\\Entity\\Message m WHERE m.family = :fam AND m.imagePath IS NOT NULL')
+                    ->setParameter('fam', $family)
+                    ->getSingleScalarResult();
+            } catch (\Throwable) { $chatPhotoCount = 0; }
+            $chatPhotoLimitReached = $chatPhotoCount >= $chatPhotoLimit;
             // Invitation
             $invitation = new Invitation();
             $inviteForm = $this->createForm(InvitationFormType::class, $invitation);
@@ -122,6 +131,12 @@ class FamilyController extends AbstractController
                 /** @var UploadedFile|null $img */
                 $img = $messageForm->get('image')->getData();
                 if ($img) {
+                    if ($chatPhotoLimitReached) {
+                        $this->addFlash('error', 'La limite de 50 photos dans la messagerie est atteinte. Votre image n\'a pas été envoyée.');
+                        $img = null; // ignore image, keep text message
+                    }
+                }
+                if ($img) {
                     $uploads = dirname(__DIR__, 2) . '/public/uploads/chat';
                     (new Filesystem())->mkdir($uploads);
                     $name = bin2hex(random_bytes(8)) . '.' . $img->guessExtension();
@@ -130,6 +145,11 @@ class FamilyController extends AbstractController
                 }
                 $em->persist($message);
                 $em->flush();
+                try { (new \App\Service\BirthdaySync($em))->syncForUserInFamily($user, $new); } catch (\Throwable $e) {}
+                try { (new \App\Service\BirthdaySync($em))->syncForUserInFamily($user, $family); } catch (\Throwable $e) {}
+                try { $birthdaySync->syncForUserInFamily($user, $family); } catch (\Throwable $e) {}
+                try { $birthdaySync->syncForUserInFamily($user, $new); } catch (\Throwable $e) {}
+                try { $birthdaySync->syncForUserInFamily($user, $family); } catch (\Throwable $e) {}
                 return $this->redirectToRoute('family_home', ['fid' => $family->getId()]);
             }
 
@@ -176,6 +196,9 @@ class FamilyController extends AbstractController
             'gallery' => ($family ? $photos->findByFamily($family, 500) : []),
             'monthEvents' => $monthEvents ?? [],
             'currentMonth' => isset($start) ? $start : new \DateTimeImmutable(),
+            'chatPhotoCount' => $chatPhotoCount,
+            'chatPhotoLimit' => $chatPhotoLimit,
+            'chatPhotoLimitReached' => $chatPhotoLimitReached,
         ]);
     }
 
@@ -253,7 +276,7 @@ class FamilyController extends AbstractController
     }
 
     #[Route('/invite/{token}', name: 'family_invite_accept')]
-    public function accept(string $token, InvitationRepository $invitations, EntityManagerInterface $em): Response
+    public function accept(string $token, InvitationRepository $invitations, EntityManagerInterface $em, \App\Service\BirthdaySync $birthdaySync): Response
     {
         $inv = $invitations->findOneBy(['token' => $token, 'status' => 'pending']);
         if (!$inv) {
@@ -270,6 +293,7 @@ class FamilyController extends AbstractController
         $inv->setStatus('accepted');
         $inv->setAcceptedAt(new \DateTimeImmutable());
         $em->flush();
+        try { $birthdaySync->syncForUserInFamily($user, $inv->getFamily()); } catch (\Throwable $e) {}
         $this->addFlash('success', 'Invitation acceptée. Bienvenue !');
         return $this->redirectToRoute('family_home');
     }
@@ -290,6 +314,7 @@ class FamilyController extends AbstractController
         if ($target) {
             $target->addFamily($family);
             $em->flush();
+            try { (new \App\Service\BirthdaySync($em))->syncForUserInFamily($target, $family); } catch (\Throwable $e) {}
             $this->addFlash('success', 'Membre ajouté à la famille.');
         } else {
             $this->addFlash('info', "Utilisateur introuvable. Utilisez l'invitation par email.");
@@ -313,4 +338,6 @@ class FamilyController extends AbstractController
         return $this->redirectToRoute('family_home');
     }
 }
+
+
 

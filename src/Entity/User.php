@@ -36,9 +36,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank]
     private string $lastName = '';
 
-    #[ORM\Column(type: 'integer', nullable: true)]
-    #[Assert\GreaterThanOrEqual(0)]
-    private ?int $age = null;
+    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    #[Assert\NotNull(message: "La date de naissance est requise.")]
+    #[Assert\LessThanOrEqual('-18 years', message: "Vous devez avoir au moins 18 ans pour utiliser le site.")]
+    private ?\DateTimeImmutable $birthDate = null;
 
     #[ORM\Column(type: 'string', length: 20, nullable: true)]
     private ?string $postalCode = null;
@@ -93,8 +94,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getLastName(): string { return $this->lastName; }
     public function setLastName(string $lastName): self { $this->lastName = $lastName; return $this; }
 
-    public function getAge(): ?int { return $this->age; }
-    public function setAge(?int $age): self { $this->age = $age; return $this; }
+    public function getBirthDate(): ?\DateTimeImmutable { return $this->birthDate; }
+    public function setBirthDate(?\DateTimeImmutable $date): self { $this->birthDate = $date; return $this; }
+
+    public function getAge(): ?int
+    {
+        if (!$this->birthDate) { return null; }
+        $today = new \DateTimeImmutable('today');
+        $age = $this->birthDate->diff($today)->y;
+        return $age;
+    }
 
     public function getPostalCode(): ?string { return $this->postalCode; }
     public function setPostalCode(?string $postalCode): self { $this->postalCode = $postalCode; return $this; }

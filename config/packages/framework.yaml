@@ -15,3 +15,6 @@ framework:
   assets: ~
   router:
     utf8: true
+  # Behind reverse proxy (Nginx) configure trusted proxies/hosts via env
+  trusted_proxies: '%env(TRUSTED_PROXIES)%'
+  trusted_hosts: '%env(TRUSTED_HOSTS)%'

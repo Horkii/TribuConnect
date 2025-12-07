@@ -5,7 +5,7 @@ namespace App\Form;
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\BirthdayType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -20,13 +20,11 @@ class RegistrationFormType extends AbstractType
         $builder
             ->add('firstName', TextType::class, [ 'label' => 'Prénom' ])
             ->add('lastName', TextType::class, [ 'label' => 'Nom' ])
-            ->add('age', IntegerType::class, [
-                'label' => 'Âge',
+            ->add('birthDate', BirthdayType::class, [
+                'label' => 'Date de naissance',
                 'required' => true,
-                'constraints' => [
-                    new Assert\NotBlank(message: "L'âge est requis (minimum 18 ans)."),
-                    new Assert\GreaterThanOrEqual(value: 18, message: "Vous devez avoir au moins 18 ans pour utiliser le site."),
-                ],
+                'widget' => 'single_text',
+                'input' => 'datetime_immutable',
             ])
             ->add('email', EmailType::class, [ 'label' => 'Email' ])
             ->add('postalCode', TextType::class, [ 'label' => 'Code postal', 'required' => false ])

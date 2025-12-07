@@ -4,6 +4,18 @@
 
 {% block body %}
   <h1>Ma famille</h1>
+  {% if families is defined and families|length > 1 %}
+    <form method="get" action="{{ path('family_home') }}" style="margin-bottom:.75rem; display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;">
+      <label>Famille
+        <select name="fid" onchange="this.form.submit()">
+          {% for f in families %}
+            <option value="{{ f.id }}" {% if family and f.id == family.id %}selected{% endif %}>{{ f.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <noscript><button class="btn" type="submit">Voir</button></noscript>
+    </form>
+  {% endif %}
   {% set ownsOne = false %}
   {% if families is defined %}
     {% for f in families %}
@@ -133,7 +145,7 @@
           </div>
         </div>
       {% else %}
-        <em>Aucune photo pour l’instant.</em>
+        <em>Aucune photo pour l'instant.</em>
       {% endfor %}
     </div>
 

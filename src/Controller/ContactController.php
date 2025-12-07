@@ -31,7 +31,7 @@ class ContactController extends AbstractController
             $em->flush();
             $email = (new Email())
                 ->from($from)
-                ->to('support@tribuconnect.fr')
+                ->to('contact@tribuconnect.fr')
                 ->subject('[TribuConnect] Message de contact')
                 ->text($body);
             try {
@@ -39,7 +39,7 @@ class ContactController extends AbstractController
                 // Accusé de réception automatique à l'expéditeur
                 try {
                     $ack = (new Email())
-                        ->from('support@tribuconnect.fr')
+                        ->from('contact@tribuconnect.fr')
                         ->to($from)
                         ->subject('Accusé de réception — Service modération TribuConnect')
                         ->text(

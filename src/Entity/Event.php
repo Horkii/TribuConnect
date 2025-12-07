@@ -12,6 +12,8 @@ class Event
 {
     public const RECURRENCE_NONE = 'none';
     public const RECURRENCE_YEARLY = 'yearly';
+    public const RECURRENCE_MONTHLY = 'monthly';
+    public const RECURRENCE_WEEKLY = 'weekly';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -67,4 +69,3 @@ class Event
     public function getRecurrence(): string { return $this->recurrence; }
     public function setRecurrence(string $recurrence): self { $this->recurrence = $recurrence; return $this; }
 }
-

@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ProfileController extends AbstractController
 {
-    public function index(Request $request, EntityManagerInterface $em): Response
+    public function index(Request $request, EntityManagerInterface $em, \App\Service\BirthdaySync $birthdaySync): Response
     {
         $user = $this->getUser();
         if (!$user) { return $this->redirectToRoute('app_login'); }
@@ -22,6 +22,13 @@ class ProfileController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
+            try {
+                if (method_exists($user, 'getFamilies')) {
+                    foreach ($user->getFamilies() as $fam) {
+                        $birthdaySync->syncForUserInFamily($user, $fam);
+                    }
+                }
+            } catch (\Throwable $e) {}
             $this->addFlash('success', 'Profil mis à jour.');
             return $this->redirectToRoute('profile_home');
         }
@@ -65,3 +72,4 @@ class ProfileController extends AbstractController
         return $this->redirectToRoute('homepage', ['deleted' => 1]);
     }
 }
+

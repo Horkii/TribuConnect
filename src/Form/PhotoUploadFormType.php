@@ -26,7 +26,7 @@ class PhotoUploadFormType extends AbstractType
                 'label' => 'Photo',
                 'mapped' => false,
                 'constraints' => [
-                    new File(maxSize: '8M', mimeTypes: ['image/jpeg', 'image/png', 'image/webp'])
+                    new File(maxSize: '10M', mimeTypes: ['image/jpeg', 'image/png', 'image/webp'])
                 ],
             ])
             ->add('submit', SubmitType::class, ['label' => 'Téléverser']);
@@ -39,4 +39,3 @@ class PhotoUploadFormType extends AbstractType
         ]);
     }
 }
-

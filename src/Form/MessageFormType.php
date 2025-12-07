@@ -21,7 +21,7 @@ class MessageFormType extends AbstractType
                 'label' => 'Image (optionnel)',
                 'mapped' => false,
                 'required' => false,
-                'constraints' => [ new File(maxSize: '8M', mimeTypes: ['image/jpeg','image/png','image/webp']) ],
+                'constraints' => [ new File(maxSize: '10M', mimeTypes: ['image/jpeg','image/png','image/webp']) ],
             ])
             ->add('submit', SubmitType::class, ['label' => 'Publier']);
     }

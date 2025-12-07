@@ -111,7 +111,7 @@ class AdminController extends AbstractController
         }
         try {
             $email = (new Email())
-                ->from('support@tribuconnect.fr')
+                ->from('contact@tribuconnect.fr')
                 ->to($m->getFromEmail())
                 ->subject($subject)
                 ->text($body."\n\n— Service modération TribuConnect");

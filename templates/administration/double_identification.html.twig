@@ -4,7 +4,7 @@
 
 {% block body %}
   <h1>Double identification (2FA)</h1>
-  <p>Un code de vérification vient de vous être envoyé par SMS. En environnement de dev, si aucun numéro n’est défini, le code est envoyé par email (visible dans Mailhog).</p>
+  <p>Un code de vérification vient de vous être envoyé par SMS. En environnement de dev, si aucun numéro n'est défini, le code est envoyé par email (visible dans Mailhog).</p>
   <form method="post" action="{{ path('admin_2fa_verify') }}" style="max-width:420px;">
     <label>Code reçu
       <input type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required placeholder="000000">

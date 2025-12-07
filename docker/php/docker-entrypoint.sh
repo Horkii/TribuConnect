@@ -3,8 +3,15 @@ set -euo pipefail
 
 cd /var/www/html
 
-# Ensure needed dirs
-mkdir -p var/cache var/log var/mails public/uploads/photos
+# Ensure needed dirs (cache, logs, mails, uploads, doctrine proxies)
+mkdir -p \
+  var/cache \
+  var/log \
+  var/mails \
+  public/uploads/photos \
+  var/cache/dev/doctrine/orm/Proxies \
+  var/cache/prod/doctrine/orm/Proxies
+mkdir -p var/doctrine/proxies
 chmod -R u+rwX,g+rwX var public/uploads || true
 
 
@@ -22,9 +29,12 @@ fi
 # Always refresh optimized autoload to ensure new classes are discovered
 composer dump-autoload -o || true
 
-# Ensure web user owns writable dirs (cache, logs, mails, uploads)
+# Ensure web user owns writable dirs (cache, logs, mails, uploads, doctrine proxies)
 chown -R www-data:www-data var public/uploads || true
 chmod -R u+rwX,g+rwX var public/uploads || true
+# Extra permissive fallback for Windows-mounted volumes (cache + doctrine proxies)
+chmod -R a+rwX var/cache || true
+chmod -R a+rwX var/doctrine/proxies || true
 
 # Clear cache to ensure fresh metadata/config (run as www-data to avoid root-owned cache)
 if command -v su >/dev/null 2>&1; then

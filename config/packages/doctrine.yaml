@@ -5,6 +5,8 @@ doctrine:
     default_connection: default
   orm:
     auto_generate_proxy_classes: true
+    # Write Doctrine proxies to /tmp to avoid host volume permission issues (Docker Desktop/Windows)
+    proxy_dir: '/tmp/doctrine/proxies'
     default_entity_manager: default
     entity_managers:
       default:

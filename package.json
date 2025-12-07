@@ -1,0 +1,27 @@
+{
+  "name": "tribuconnect",
+  "version": "1.0.0",
+  "description": "TribuConnect — Calendrier familial partagé",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Horkii/TribuConnect.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Horkii/TribuConnect/issues"
+  },
+  "homepage": "https://github.com/Horkii/TribuConnect#readme",
+  "dependencies": {
+    "docx": "^9.5.1",
+    "highlight.js": "^11.11.1",
+    "image-size": "^2.0.2",
+    "puppeteer": "^24.25.0"
+  },
+  "devDependencies": {}
+}

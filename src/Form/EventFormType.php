@@ -36,7 +36,9 @@ class EventFormType extends AbstractType
                 'label' => 'Récurrence',
                 'choices' => [
                     'Aucune' => Event::RECURRENCE_NONE,
-                    'Chaque année (anniversaire)' => Event::RECURRENCE_YEARLY,
+                    'Chaque année' => Event::RECURRENCE_YEARLY,
+                    'Chaque mois' => Event::RECURRENCE_MONTHLY,
+                    'Chaque semaine' => Event::RECURRENCE_WEEKLY,
                 ],
             ]);
     }

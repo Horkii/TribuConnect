@@ -10,6 +10,9 @@ services:
       APP_SECRET: 2f3f5b2a1c7e4c9e9d8c7b6a5f4e3d2c
       TZ: Europe/Paris
       APP_TIMEZONE: Europe/Paris
+      APP_ASSET_VERSION: "20251013-2"
+      TRUSTED_PROXIES: "127.0.0.1,REMOTE_ADDR"
+      TRUSTED_HOSTS: '^.+$'
       DATABASE_URL: postgresql://tribu:tribu@db:5432/tribu?serverVersion=16&charset=utf8
       MAILER_DSN: smtp://mailhog:1025
       REDIS_URL: redis://redis:6379
