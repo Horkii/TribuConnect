@@ -13,6 +13,8 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       MAILER_DSN: ${MAILER_DSN}
       REDIS_URL: ${REDIS_URL}
+      TRUSTED_PROXIES: "127.0.0.1,REMOTE_ADDR"
+      TRUSTED_HOSTS: '^.+$'
     ports:
       - "8080:80"
     depends_on:
@@ -46,4 +48,3 @@ services:
 
 volumes:
   pg_data:
-
