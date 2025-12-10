@@ -13,6 +13,9 @@ class WorkPattern
     public const SHIFT_AFTERNOON = 2;
     public const SHIFT_NIGHT = 3;
     public const SHIFT_HOLIDAY = 4; // congé spécifique (visuel distinct)
+    public const SHIFT_DAY = 5;      // journée complète
+    public const SHIFT_REMOTE = 6;   // télétravail
+    public const SHIFT_TRAVEL = 7;   // déplacement professionnel
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

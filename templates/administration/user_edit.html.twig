@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration • Profil utilisateur{% endblock %}
+
+{% block body %}
+  <h1>Profil utilisateur</h1>
+  <p style="margin-bottom:.5rem;">
+    <a class="btn" href="{{ path('admin_users') }}">← Retour à la liste des utilisateurs</a>
+  </p>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <h3 style="margin-top:0;">Informations du compte</h3>
+    <p>
+      <strong>Email :</strong> {{ userEntity.email }}<br>
+      <strong>Nom :</strong> {{ userEntity.firstName }} {{ userEntity.lastName|upper }}<br>
+      <strong>Rôles :</strong>
+      {% set roles = userEntity.roles|default([]) %}
+      {% if roles is empty %}
+        ROLE_USER
+      {% else %}
+        {{ roles|join(', ') }}
+      {% endif %}
+    </p>
+    <p>
+      <strong>Familles associées :</strong>
+      {% if userEntity.families is defined and userEntity.families|length > 0 %}
+        {% for f in userEntity.families %}
+          {{ loop.first ? '' : ', ' }}{{ f.name }}
+        {% endfor %}
+      {% else %}
+        <em>Aucune</em>
+      {% endif %}
+    </p>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <h3 style="margin-top:0;">Modifier les informations</h3>
+    {{ form_start(userForm) }}
+      {{ form_row(userForm.firstName) }}
+      {{ form_row(userForm.lastName) }}
+      {{ form_row(userForm.birthDate) }}
+      {{ form_row(userForm.email) }}
+      {{ form_row(userForm.postalCode) }}
+      {{ form_row(userForm.cityOrRegion) }}
+      {{ form_row(userForm.submit) }}
+    {{ form_end(userForm) }}
+  </div>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <h3 style="margin-top:0;">Supprimer ce compte</h3>
+    <p>
+      Cette action supprimera définitivement le compte utilisateur, ses familles dont il est propriétaire,
+      ses messages et détachera les événements qu’il a créés. Utilisez cette action avec précaution.
+    </p>
+    <form method="post" action="{{ path('admin_user_delete', {id: userEntity.id}) }}" onsubmit="return confirm('Supprimer définitivement ce compte utilisateur ? Cette action est irréversible.');">
+      <input type="hidden" name="_token" value="{{ csrf_token('admin_delete_user_' ~ userEntity.id) }}">
+      <button class="btn danger" type="submit">Supprimer ce compte</button>
+    </form>
+  </div>
+{% endblock %}

@@ -1,12 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Administration ? Double identification{% endblock %}
+{% block title %}Administration · Double identification{% endblock %}
 
 {% block body %}
   <h1>Double identification (2FA)</h1>
-  <p>Un code de v?rification ? 5 chiffres vient d'?tre envoy? ? l'adresse <strong>contact@tribuconnect.fr</strong>. Saisissez-le ci-dessous pour acc?der ? l'administration.</p>
+  <p>Un code de vérification à 5 chiffres vient d'être envoyé à l'adresse <strong>contact@tribuconnect.fr</strong>. Saisissez-le ci-dessous pour accéder à l'administration.</p>
   <form method="post" action="{{ path('admin_2fa_verify') }}" style="max-width:420px;">
-    <label>Code re?u
+    <label>Code reçu
       <input type="text" name="code" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" required placeholder="00000">
     </label>
     <button class="btn" type="submit">Valider</button>

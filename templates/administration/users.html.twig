@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration • Utilisateurs{% endblock %}
+
+{% block body %}
+  <h1>Administration • Utilisateurs</h1>
+  <p style="margin-bottom:.5rem;">
+    <a class="btn" href="{{ path('admin_home') }}">← Retour aux familles</a>
+  </p>
+  <form method="get" style="margin:.5rem 0; display:flex; gap:.5rem; align-items:center;">
+    <input type="search" name="q" value="{{ q }}" placeholder="Rechercher par email ou nom" style="flex:1;">
+    <button class="btn">Rechercher</button>
+  </form>
+  <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+    <table>
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Nom</th>
+          <th>Rôles</th>
+          <th>Familles</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for u in users %}
+        <tr>
+          <td>{{ u.email }}</td>
+          <td>{{ u.firstName }} {{ u.lastName|upper }}</td>
+          <td>
+            {% set roles = u.roles|default([]) %}
+            {% if roles is empty %}
+              ROLE_USER
+            {% else %}
+              {{ roles|join(', ') }}
+            {% endif %}
+          </td>
+          <td>{{ u.families is defined ? u.families|length : 0 }}</td>
+          <td>
+            <a class="btn" href="{{ path('admin_user_edit', {id: u.id}) }}">Voir / modifier</a>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5"><em>Aucun utilisateur</em></td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
+

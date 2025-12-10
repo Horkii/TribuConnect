@@ -1,9 +1,11 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Accueil • TribuConnect{% endblock %}
+{% block title %}Accueil – TribuConnect{% endblock %}
 
 {% block page_hero_title %}<h1>Accueil</h1>{% endblock %}
-{% block page_hero_description %}<p>Rassembler vos proches, simplement : calendrier, événements, photos et discussions.</p>{% endblock %}
+{% block page_hero_description %}
+  <p>Rassembler vos proches, simplement : calendrier, événements, photos et discussions.</p>
+{% endblock %}
 
 {% block body %}
   <style>
@@ -13,11 +15,12 @@
   </style>
 
   <div class="card" style="margin-top:1rem;">
-    <h3 style="margin-top:0;">Passage en alpha 1.1</h3>
+    <h3 style="margin-top:0;">Passage en alpha 1.1.2</h3>
     <p>
       TribuConnect évolue régulièrement pour rester fidèle à sa promesse : offrir un espace simple
       et fiable pour organiser la vie familiale. Dans cette version, nous avons surtout travaillé la
-      stabilité du site, la clarté des textes et la sécurité des comptes. Nous avons également mis en place un nouveau calendrier pour les rythmes de travail particuliers.
+      stabilité du site, la clarté des textes et la sécurité des comptes. Nous avons également mis en
+      place un nouveau calendrier pour les rythmes de travail particuliers.
     </p>
   </div>
 
@@ -26,7 +29,7 @@
       <h3 style="margin-top:0;">Notre raison d’être</h3>
       <p>
         Permettre aux familles et aux proches de rester connectés au quotidien. TribuConnect
-        centralise les moments importants : anniversaires, sorties, photos et messages — le tout
+        centralise les moments importants : anniversaires, sorties, photos et messages – le tout
         dans un espace privé et convivial, sans publicité.
       </p>
       <ul>
@@ -76,17 +79,19 @@
       équipes, roulements de nuit, week‑ends travaillés ou repos décalés. Dans l’onglet « Horaires
       de travail » du calendrier, vous pouvez définir votre propre cycle de travail jusqu’à 21 jours
       et laisser l’application appliquer automatiquement ce rythme sur tout le mois. Chaque jour du
-      cycle peut être configuré comme « Repos », « Matin », « Après‑midi », « Nuit » ou « Congé », avec
-      un code couleur spécifique pour repérer d’un coup d’œil le type de journée.
+      cycle peut être configuré comme « Repos », « Matin », « Après‑midi », « Nuit », « Congé », « Journée »,
+      « Télétravail » ou « Déplacement », chacun avec une couleur bien distincte pour repérer d’un coup
+      d’œil le type de journée.
     </p>
     <p>
       Concrètement, vous choisissez la longueur de votre cycle (par exemple 7, 14 ou 21 jours) ainsi
       que la date de début. Vous indiquez ensuite, jour après jour, votre rythme : repos, matin, matin,
-      après‑midi, nuit, etc. Une fois ce rythme enregistré, TribuConnect calcule automatiquement, pour
-      chaque date du calendrier, quel type de journée s’applique. Si une situation particulière se
-      présente (congé exceptionnel, changement de planning de dernière minute), vous pouvez modifier
-      un jour isolé directement depuis la case du calendrier, sans casser l’ensemble du cycle. Ces
-      ajustements sont mémorisés et visibles pour toute la famille concernée.
+      après‑midi, nuit, journée, télétravail, déplacement, etc. Une fois ce rythme enregistré,
+      TribuConnect calcule automatiquement, pour chaque date du calendrier, quel type de journée
+      s’applique. Si une situation particulière se présente (congé exceptionnel, changement de planning
+      de dernière minute), vous pouvez modifier un jour isolé directement depuis la case du calendrier,
+      sans casser l’ensemble du cycle. Ces ajustements sont mémorisés et visibles pour toute la famille
+      concernée.
     </p>
     <p>
       Le calendrier d’horaires de travail a été conçu pour rester confortable à utiliser sur

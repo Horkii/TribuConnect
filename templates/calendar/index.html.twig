@@ -1,10 +1,30 @@
 ﻿{% extends 'base.html.twig' %}
 
-{% block title %}Calendrier — TribuConnect{% endblock %}
+{% block title %}Calendrier TribuConnect{% endblock %}
 
 {% block body %}
-  {% set mois = ['', 'janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'] %}
-  <h1>Calendrier — {{ mois[month|date('n')] }} {{ month|date('Y') }}</h1>
+  {% set mois = ['', 'janvier','février','mars','avril','mai','juin','juillet','aoét','septembre','octobre','novembre','décembre'] %}
+  {% set shiftLabels = {
+    0: 'Repos',
+    1: 'Matin',
+    2: 'Après-midi',
+    3: 'Nuit',
+    4: 'Congé',
+    5: 'Journée',
+    6: 'Télétravail',
+    7: 'Déplacement'
+  } %}
+  {% set shiftColors = {
+    0: '#2e7d32',  # Repos - vert
+    1: '#4FC3F7',  # Matin - bleu clair
+    2: '#1976D2',  # Après-midi - bleu moyen
+    3: '#0D47A1',  # Nuit - bleu très foncé
+    4: '#00838F',  # Congé - bleu/vert sombre
+    5: '#00BCD4',  # Journée - bleu turquoise
+    6: '#5C6BC0',  # Télétravail - bleu violacé
+    7: '#546E7A'   # Déplacement - bleu/gris
+  } %}
+  <h1>Calendrier {{ mois[month|date('n')] }} {{ month|date('Y') }}</h1>
 
   <nav class="calendar-tabs" role="tablist" aria-label="Type de calendrier" style="display:flex; justify-content:center; gap:.35rem; margin:.5rem auto 1rem;">
     <a class="tab {{ tab|default('family') == 'family' ? 'active' : '' }}" href="{{ path('calendar_home', {fid: currentFamily ? currentFamily.id : null, month: month|date('n'), year: month|date('Y'), tab: 'family', view: view|default('month')}) }}#calendar">Calendrier familial</a>
@@ -27,12 +47,14 @@
     .month-grid-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
     .work-form .inline-field { min-width: 0; }
 
-    /* Desktop (>=1024px): cases fixes, même taille */
+    /* Desktop (>=1024px): cases fixes, méme taille */
     .day-box { display:flex; flex-direction:column; height: 120px; overflow-y: auto; }
-    /* Jusqu'à L (<=1024px): hauteur adaptable par ligne */
+    .day-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:.15rem; }
+    .day-dow { font-size:.7em; opacity:.7; text-align:right; }
+    /* Jusqu'é L (<=1024px): hauteur adaptable par ligne */
     @media (max-width: 1024px) { .day-box { height: auto; min-height: 120px; overflow: visible; } }
 
-    /* Famille: évènements compacts (desktop) */
+    /* Famille: événements compacts (desktop) */
     .month-grid button[popovertarget^="pop-m-"] {
       display:flex; align-items:center; justify-content:flex-start; text-align:left;
       width:100%; min-height:28px; padding:.25rem .4rem; font-size:.8rem;
@@ -49,13 +71,13 @@
       word-break:break-word; hyphens:auto;
     }
 
-    /* Mobile/tablette: 3 colonnes jusqu'à L */
+    /* Mobile/tablette: 3 colonnes jusqu'é L */
     @media (max-width: 1024px) {
       .month-grid-wrap { overflow-x: visible; }
       .month-grid { min-width: 0; grid-template-columns: repeat(3, 1fr); margin: 0 auto; }
     }
 
-    /* Masquer l'entête des jours sur mobile/tablette */
+    /* Masquer l'entéte des jours sur mobile/tablette */
     @media (max-width: 1024px) { .month-grid .dow { display:none !important; } }
     /* Supprimer les puces sur mobile/tablette */
     @media (max-width: 1024px) {
@@ -80,7 +102,7 @@
       .calendar-controls-below .calendar-nav > div:nth-child(3) { grid-row:2; grid-column:2; text-align:right; }
     }
 
-    /* Téléphone: cartes d'évènements empilées (mots à la ligne) */
+    /* Téléphone: cartes d'événements empilées (mots à la ligne) */
     @media (max-width: 640px) {
       .month-grid .day-box { padding:.35rem; }
       .month-grid button[popovertarget^="pop-m-"] {
@@ -148,7 +170,7 @@
     </form>
   {% endif %}
 
-  {# VUE ANNÉE (onglet familial) #}
+  {# VUE ANNéE (onglet familial) #}
   {% if view == 'year' and tab|default('family') == 'family' %}
     <section id="calendar" style="margin-top:1rem">
       <h3>{{ year }}</h3>
@@ -168,13 +190,13 @@
       </div>
       <div class="year-bottom-nav" style="margin-top:.5rem; display:grid; grid-template-columns: 1fr auto 1fr; align-items:center;">
         <div style="text-align:left">
-          <a class="btn" href="{{ path('calendar_home', {view: 'year', year: prevYear, fid: currentFamily ? currentFamily.id : null, tab: tab}) }}#calendar">← Année précédente</a>
+          <a class="btn" href="{{ path('calendar_home', {view: 'year', year: prevYear, fid: currentFamily ? currentFamily.id : null, tab: tab}) }}#calendar">? Année précédente</a>
         </div>
         <div style="text-align:center">
           <a class="btn" href="{{ path('calendar_home', {year: month|date('Y'), month: month|date('n'), fid: currentFamily ? currentFamily.id : null, tab: tab}) }}#calendar">Retour vue au mois</a>
         </div>
         <div style="text-align:right">
-          <a class="btn" href="{{ path('calendar_home', {view: 'year', year: nextYear, fid: currentFamily ? currentFamily.id : null, tab: tab}) }}#calendar">Année suivante →</a>
+          <a class="btn" href="{{ path('calendar_home', {view: 'year', year: nextYear, fid: currentFamily ? currentFamily.id : null, tab: tab}) }}#calendar">Année suivante ?</a>
         </div>
       </div>
     </section>
@@ -185,18 +207,44 @@
         <h3>{{ mois[month|date('n')] }} {{ month|date('Y') }}</h3>
         <div class="month-grid-wrap"><div class="month-grid">
           {% set days = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'] %}
+          {% set shiftLabels = {
+            0: 'Repos',
+            1: 'Matin',
+            2: 'Aprés-midi',
+            3: 'Nuit',
+            4: 'Congé',
+            5: 'Journée',
+            6: 'Télétravail',
+            7: 'Déplacement'
+          } %}
+          {% set shiftColors = {
+            0: '#2e7d32',
+            1: '#039be5',
+            2: '#1565c0',
+            3: '#0d47a1',
+            4: '#00897b',
+            5: '#42a5f5',
+            6: '#64b5f6',
+            7: '#1e88e5'
+          } %}
           {% for d in days %}
             <div class="dow" style="text-align:center; font-weight:bold;">{{ d }}</div>
           {% endfor %}
           {% for w in weeks %}
             {% for cell in w %}
               <div class="day-box" style="border:1px solid #ddd; padding:.4rem; opacity: {{ cell.inMonth ? '1' : '.5' }};">
-                <div class="day-num" style="font-size:.9em; font-weight:bold;">{{ cell.date|date('j') }}</div>
+                <div class="day-header">
+                  <div class="day-num" style="font-size:.9em; font-weight:bold;">{{ cell.date|date('j') }}</div>
+                  <div class="day-dow">
+                    {% set dowIndex = cell.date|date('N') %}
+                    {{ ['','Lun','Mar','Mer','Jeu','Ven','Sam','Dim'][dowIndex] }}
+                  </div>
+                </div>
                 <ul class="events" style="margin:.25rem 0 0; list-style: none;">
                   {% for e in cell.events %}
                     <li style="font-size:.85em; margin-bottom:.25rem;">
                       {% set pid = 'pop-m-' ~ e.id %}
-                      {# Âge pour anniversaires: calcule avec date de la case #}
+                      {# ége pour anniversaires: calcule avec date de la case #}
                       {% set bage = null %}
                       {% if e.recurrence == constant('App\\Entity\\Event::RECURRENCE_YEARLY') and currentFamily and currentFamily.members is defined %}
                         {% for m in currentFamily.members %}
@@ -273,17 +321,23 @@
             {% for cell in w %}
               {% set key = cell.date|date('Y-m-d') %}
               <div class="day-box" style="border:1px solid #ddd; padding:.4rem; opacity: {{ cell.inMonth ? '1' : '.5' }};">
-                <div class="day-num" style="font-size:.9em; font-weight:bold;">{{ cell.date|date('j') }}</div>
+                <div class="day-header">
+                  <div class="day-num" style="font-size:.9em; font-weight:bold;">{{ cell.date|date('j') }}</div>
+                  <div class="day-dow">
+                    {% set dowIndex = cell.date|date('N') %}
+                    {{ ['','Lun','Mar','Mer','Jeu','Ven','Sam','Dim'][dowIndex] }}
+                  </div>
+                </div>
                 <ul class="events" style="margin:.25rem 0 0; list-style:none;">
                   {% for it in workByDay[key]|default([]) %}
                     {% set p = it.pattern %}
                     {% set v = it.value %}
-                    {% set label = v == 4 ? 'Congé' : (v == 0 ? 'Repos' : (v == 1 ? 'Matin' : (v == 2 ? 'Après‑midi' : 'Nuit'))) %}
+                    {% set label = shiftLabels[v]|default('') %}
                     {% set pid = 'pop-w-' ~ p.id ~ '-' ~ key %}
                     <li style="font-size:.85em; margin-bottom:.25rem;">
-                      {% set bg = v == 4 ? '#00897b' : (v == 0 ? '#2e7d32' : (v == 1 ? '#039be5' : (v == 2 ? '#1565c0' : '#0d47a1'))) %}
+                      {% set bg = shiftColors[v]|default('#0d47a1') %}
                       {% set styleBtn = 'background:' ~ bg ~ '; border-color:' ~ bg ~ '; color:#fff;' %}
-                      <button class="btn" style="padding:.2rem .5rem; font-size:.85em; {{ styleBtn }}" popovertarget="{{ pid }}">{{ label }} — {{ p.owner.firstName }} {{ p.owner.lastName|upper }}</button>
+                      <button class="btn" style="padding:.2rem .5rem; font-size:.85em; {{ styleBtn }}" popovertarget="{{ pid }}">{{ label }} - {{ p.owner.firstName }} {{ p.owner.lastName|upper }}</button>
                       <div id="{{ pid }}" popover style="padding:.6rem; max-width:320px; border:1px solid #cfd4dc; border-radius:.6rem;">
                         <form method="post" action="{{ path('work_update') }}" style="margin:0;">
                           <input type="hidden" name="pattern_id" value="{{ p.id }}">
@@ -294,8 +348,11 @@
                               <option value="4" {{ v == 4 ? 'selected' : '' }}>Congé</option>
                               <option value="0" {{ v == 0 ? 'selected' : '' }}>Repos</option>
                               <option value="1" {{ v == 1 ? 'selected' : '' }}>Matin</option>
-                              <option value="2" {{ v == 2 ? 'selected' : '' }}>Après‑midi</option>
+                              <option value="2" {{ v == 2 ? 'selected' : '' }}>Après-midi</option>
                               <option value="3" {{ v == 3 ? 'selected' : '' }}>Nuit</option>
+                              <option value="5" {{ v == 5 ? 'selected' : '' }}>Journée</option>
+                              <option value="6" {{ v == 6 ? 'selected' : '' }}>Télétravail</option>
+                              <option value="7" {{ v == 7 ? 'selected' : '' }}>Déplacement</option>
                             </select>
                           </label>
                           <div style="margin-top:.5rem; text-align:right">
@@ -305,7 +362,7 @@
                       </div>
                     </li>
                   {% else %}
-                    <li style="font-size:.8em; opacity:.6;">—</li>
+                    <li style="font-size:.8em; opacity:.6;">é</li>
                   {% endfor %}
                 </ul>
               </div>
@@ -383,7 +440,7 @@
             <ul>
               {% for p in workPatterns %}
                 <li style="display:flex; align-items:center; gap:.5rem; justify-content:space-between;">
-                  <small>{{ p.owner.firstName }} {{ p.owner.lastName|upper }} — cycle {{ p.cycleLength }}j, début {{ p.startDate|date('d/m/Y') }}</small>
+                  <small>{{ p.owner.firstName }} {{ p.owner.lastName|upper }} é cycle {{ p.cycleLength }}j, début {{ p.startDate|date('d/m/Y') }}</small>
                   {% set canDelete = app.user and (p.owner and p.owner.id == app.user.id) or (currentFamily and currentFamily.owner and currentFamily.owner.id == app.user.id) or is_granted('ROLE_ADMIN') %}
                   {% if canDelete %}
                     <form method="post" action="{{ path('work_pattern_delete', {id: p.id}) }}" onsubmit="return confirm('Supprimer ce rythme ?');" style="margin:0;">
@@ -436,7 +493,7 @@
         }
         var baseMin = 120, perEv = 26, emptyMin = 40, baseFont = 13;
         var boxes = Array.prototype.slice.call(grid.querySelectorAll('.day-box'));
-        var cols = 3; // 3 cases par ligne jusqu'à L
+        var cols = 3; // 3 cases par ligne jusqu'é L
         for (var i = 0; i < boxes.length; i += cols) {
           var row = boxes.slice(i, i + cols);
           var maxEv = 0;
@@ -451,3 +508,4 @@
     })();
   </script>
 {% endblock %}
+

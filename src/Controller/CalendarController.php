@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class CalendarController extends AbstractController
 {
-    public function index(Request $request, EventRepository $events, EntityManagerInterface $em): Response
+    public function index(Request $request, EventRepository $events, EntityManagerInterface $em, \App\Service\BirthdaySync $birthdaySync): Response
     {
         $user = $this->getUser();
         if (!$user) { return $this->redirectToRoute('app_login'); }
@@ -37,6 +37,9 @@ class CalendarController extends AbstractController
             }
             $family = $families->first();
         }
+
+        // S'assurer que l'anniversaire de l'utilisateur courant est synchronisé dans cette famille
+        try { $birthdaySync->syncForUserInFamily($user, $family); } catch (\Throwable $e) {}
 
         $event = new Event();
         $form = $this->createForm(EventFormType::class, $event);
@@ -311,7 +314,7 @@ class CalendarController extends AbstractController
         $canEdit = ($pattern->getOwner()?->getId() === $user->getId()) || ($family && $family->getOwner() && $family->getOwner()->getId() === $user->getId()) || $this->isGranted('ROLE_ADMIN');
         if (!$canEdit) { $this->addFlash('error', 'Vous ne pouvez pas modifier ce rythme.'); return $this->redirectToRoute('calendar_home', ['tab' => 'work']); }
         try { $date = new \DateTimeImmutable($dateStr.' 00:00:00'); } catch (\Throwable) { $this->addFlash('error', 'Date invalide.'); return $this->redirectToRoute('calendar_home', ['tab' => 'work']); }
-        $value = max(0, min(4, $value));
+        $value = max(0, min(WorkPattern::SHIFT_TRAVEL, $value));
         // Upsert override
         $ovr = $em->getRepository(WorkOverride::class)->findOneBy(['pattern' => $pattern, 'date' => $date]);
         if (!$ovr) { $ovr = new WorkOverride(); $ovr->setPattern($pattern)->setDate($date); $em->persist($ovr); }

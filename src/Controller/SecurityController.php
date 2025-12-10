@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegistrationFormType;
+use App\Repository\InvitationRepository;
 use App\Repository\UserRepository;
+use App\Service\BirthdaySync;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,14 +24,21 @@ class SecurityController extends AbstractController
     {
         $error = $authenticationUtils->getLastAuthenticationError();
         $lastUsername = $authenticationUtils->getLastUsername();
+
         return $this->render('security/login.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
         ]);
     }
 
-    public function register(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher, UserRepository $users): Response
-    {
+    public function register(
+        Request $request,
+        EntityManagerInterface $em,
+        UserPasswordHasherInterface $hasher,
+        UserRepository $users,
+        InvitationRepository $invitations,
+        BirthdaySync $birthdaySync
+    ): Response {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
@@ -42,6 +51,26 @@ class SecurityController extends AbstractController
                 $user->setPassword($hasher->hashPassword($user, $user->getPassword()));
                 $em->persist($user);
                 $em->flush();
+
+                // Si l'utilisateur vient d'une invitation, le rattacher automatiquement à la famille
+                $session = $request->getSession();
+                $token = $session?->get('pending_invitation_token');
+                if (is_string($token) && $token !== '') {
+                    $inv = $invitations->findOneBy(['token' => $token, 'status' => 'pending']);
+                    if ($inv && strtolower($inv->getEmail()) === strtolower($user->getEmail()) && $inv->getFamily()) {
+                        $family = $inv->getFamily();
+                        $user->addFamily($family);
+                        $inv->setStatus('accepted');
+                        $inv->setAcceptedAt(new \DateTimeImmutable());
+                        $em->flush();
+                        try {
+                            $birthdaySync->syncForUserInFamily($user, $family);
+                        } catch (\Throwable $e) {
+                        }
+                    }
+                    $session->remove('pending_invitation_token');
+                }
+
                 $this->addFlash('success', 'Compte créé. Vous pouvez vous connecter.');
                 return $this->redirectToRoute('app_login');
             }
@@ -54,7 +83,7 @@ class SecurityController extends AbstractController
 
     public function logout(): void
     {
-        // Symfony intercepts this route
+        // Symfony intercepte cette route
     }
 
     #[Route('/mot-de-passe-oublie', name: 'app_forgot_password')]
@@ -66,7 +95,7 @@ class SecurityController extends AbstractController
         UrlGeneratorInterface $urlGenerator
     ): Response {
         if ($request->isMethod('POST')) {
-            $email = trim((string)$request->request->get('email', ''));
+            $email = trim((string) $request->request->get('email', ''));
             if ($email !== '') {
                 $user = $users->findOneBy(['email' => mb_strtolower($email)]);
                 if ($user) {
@@ -75,7 +104,11 @@ class SecurityController extends AbstractController
                     $user->setResetPasswordExpiresAt(new \DateTimeImmutable('+1 hour'));
                     $em->flush();
 
-                    $link = $urlGenerator->generate('app_reset_password', ['token' => $token], UrlGeneratorInterface::ABSOLUTE_URL);
+                    $link = $urlGenerator->generate(
+                        'app_reset_password',
+                        ['token' => $token],
+                        UrlGeneratorInterface::ABSOLUTE_URL
+                    );
 
                     try {
                         $mail = (new Email())
@@ -83,9 +116,9 @@ class SecurityController extends AbstractController
                             ->to($user->getEmail())
                             ->subject('Réinitialisation de votre mot de passe')
                             ->text(
-                                "Bonjour,\n\n".
-                                "Pour réinitialiser votre mot de passe TribuConnect, cliquez sur le lien suivant (valide 1 heure) :\n".
-                                $link."\n\n".
+                                "Bonjour,\n\n" .
+                                "Pour réinitialiser votre mot de passe TribuConnect, cliquez sur le lien suivant (valide 1 heure) :\n" .
+                                $link . "\n\n" .
                                 "Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet email."
                             );
                         $mailer->send($mail);
@@ -94,6 +127,7 @@ class SecurityController extends AbstractController
                     }
                 }
             }
+
             $this->addFlash('success', 'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.');
             return $this->redirectToRoute('app_login');
         }
@@ -117,14 +151,14 @@ class SecurityController extends AbstractController
         }
 
         if ($request->isMethod('POST')) {
-            $csrfToken = (string)$request->request->get('_token');
-            if (!$this->isCsrfTokenValid('reset_password_'.$token, $csrfToken)) {
+            $csrfToken = (string) $request->request->get('_token');
+            if (!$this->isCsrfTokenValid('reset_password_' . $token, $csrfToken)) {
                 $this->addFlash('error', 'Jeton CSRF invalide.');
                 return $this->redirectToRoute('app_reset_password', ['token' => $token]);
             }
 
-            $password = (string)$request->request->get('password', '');
-            $confirm = (string)$request->request->get('password_confirm', '');
+            $password = (string) $request->request->get('password', '');
+            $confirm = (string) $request->request->get('password_confirm', '');
 
             if (strlen($password) < 8) {
                 $this->addFlash('error', 'Le mot de passe doit contenir au moins 8 caractères.');
@@ -147,3 +181,4 @@ class SecurityController extends AbstractController
         ]);
     }
 }
+

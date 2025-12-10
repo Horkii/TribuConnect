@@ -21,10 +21,15 @@ class WorkPatternFormType extends AbstractType
             'Congé' => WorkPattern::SHIFT_HOLIDAY,
             'Repos' => WorkPattern::SHIFT_REST,
             'Matin' => WorkPattern::SHIFT_MORNING,
-            'Après‑midi' => WorkPattern::SHIFT_AFTERNOON,
+            'Après-midi' => WorkPattern::SHIFT_AFTERNOON,
             'Nuit' => WorkPattern::SHIFT_NIGHT,
+            'Journée' => WorkPattern::SHIFT_DAY,
+            'Télétravail' => WorkPattern::SHIFT_REMOTE,
+            'Déplacement' => WorkPattern::SHIFT_TRAVEL,
         ];
     }
+
+
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
