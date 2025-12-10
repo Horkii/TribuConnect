@@ -440,7 +440,7 @@
             <ul>
               {% for p in workPatterns %}
                 <li style="display:flex; align-items:center; gap:.5rem; justify-content:space-between;">
-                  <small>{{ p.owner.firstName }} {{ p.owner.lastName|upper }} é cycle {{ p.cycleLength }}j, début {{ p.startDate|date('d/m/Y') }}</small>
+                  <small>{{ p.owner.firstName }} {{ p.owner.lastName|upper }}- cycle {{ p.cycleLength }}j, début {{ p.startDate|date('d/m/Y') }}</small>
                   {% set canDelete = app.user and (p.owner and p.owner.id == app.user.id) or (currentFamily and currentFamily.owner and currentFamily.owner.id == app.user.id) or is_granted('ROLE_ADMIN') %}
                   {% if canDelete %}
                     <form method="post" action="{{ path('work_pattern_delete', {id: p.id}) }}" onsubmit="return confirm('Supprimer ce rythme ?');" style="margin:0;">
