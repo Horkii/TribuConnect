@@ -163,11 +163,10 @@ class FamilyController extends AbstractController
                     $mailer->send($email);
                     $this->addFlash('success', 'Invitation envoyée.');
                 } catch (\Throwable $e) {
-                    $msg = "Invitation enregistrée mais email non envoyée.";
-                    if ($this->getParameter('kernel.debug')) {
-                        $msg .= ' Détail: ' . $e->getMessage();
-                    }
-                    $this->addFlash('error', $msg);
+                    $this->addFlash(
+                        'error',
+                        'Invitation enregistrée mais email non envoyée. Détail: ' . $e->getMessage()
+                    );
                 }
 
                 return $this->redirectToRoute('family_home', ['fid' => $family->getId()]);
