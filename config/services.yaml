@@ -1,6 +1,6 @@
 parameters:
   locale: 'fr'
-  app.mail_from: 'noreply@tribuconnect.local'
+  app.mail_from: 'contact@tribuconnect.fr'
 
 services:
   _defaults:
