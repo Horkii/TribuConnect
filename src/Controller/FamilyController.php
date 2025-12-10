@@ -41,6 +41,27 @@ class FamilyController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
+        // Si l'utilisateur vient d'une invitation en attente, le rattacher automatiquement à la famille
+        $session = $request->getSession();
+        $pendingToken = $session?->get('pending_invitation_token');
+        if (is_string($pendingToken) && $pendingToken !== '') {
+            $invRepo = $em->getRepository(Invitation::class);
+            $inv = $invRepo->findOneBy(['token' => $pendingToken, 'status' => 'pending']);
+            if ($inv && $inv->getFamily() && strtolower($inv->getEmail()) === strtolower((string) $user->getEmail())) {
+                $invFamily = $inv->getFamily();
+                $user->addFamily($invFamily);
+                $inv->setStatus('accepted');
+                $inv->setAcceptedAt(new \DateTimeImmutable());
+                $em->flush();
+                try {
+                    $birthdaySync->syncForUserInFamily($user, $invFamily);
+                } catch (\Throwable $e) {
+                }
+                $this->addFlash('success', 'Invitation acceptée. Bienvenue dans la famille ' . $invFamily->getName() . ' !');
+            }
+            $session->remove('pending_invitation_token');
+        }
+
         $families = $user->getFamilies();
 
         // liste triée alphabétiquement (par nom) pour le choix par défaut
