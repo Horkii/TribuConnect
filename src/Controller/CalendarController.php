@@ -191,8 +191,8 @@ class CalendarController extends AbstractController
                     $pat = $p->getPattern();
                     $len = max(1, (int)$p->getCycleLength());
                     if ($len < 1) { $len = count($pat) ?: 1; }
-                    $anchor = (new \DateTimeImmutable($p->getStartDate()->format('Y-m-d').' 00:00:00'));
-                    $delta = intdiv($cur->getTimestamp() - $anchor->getTimestamp(), 86400);
+                    $anchor = new \DateTimeImmutable($p->getStartDate()->format('Y-m-d').' 00:00:00');
+                    $delta = (int) $anchor->diff($cur)->format('%r%a');
                     $idx = (($delta % $len) + $len) % $len;
                     $val = isset($pat[$idx]) ? (int)$pat[$idx] : WorkPattern::SHIFT_REST;
                     $ovrKey = $p->getId().'@'.$key;

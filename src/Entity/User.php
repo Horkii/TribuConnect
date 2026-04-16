@@ -72,6 +72,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    private bool $emailVerified = true;
+
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    private ?string $emailVerifyToken = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $emailVerifyExpiresAt = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -141,4 +150,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getResetPasswordExpiresAt(): ?\DateTimeImmutable { return $this->resetPasswordExpiresAt; }
     public function setResetPasswordExpiresAt(?\DateTimeImmutable $at): self { $this->resetPasswordExpiresAt = $at; return $this; }
+
+    public function isEmailVerified(): bool { return $this->emailVerified; }
+    public function setEmailVerified(bool $verified): self { $this->emailVerified = $verified; return $this; }
+
+    public function getEmailVerifyToken(): ?string { return $this->emailVerifyToken; }
+    public function setEmailVerifyToken(?string $token): self { $this->emailVerifyToken = $token; return $this; }
+
+    public function getEmailVerifyExpiresAt(): ?\DateTimeImmutable { return $this->emailVerifyExpiresAt; }
+    public function setEmailVerifyExpiresAt(?\DateTimeImmutable $expiresAt): self { $this->emailVerifyExpiresAt = $expiresAt; return $this; }
 }

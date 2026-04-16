@@ -37,7 +37,9 @@ class SecurityController extends AbstractController
         UserPasswordHasherInterface $hasher,
         UserRepository $users,
         InvitationRepository $invitations,
-        BirthdaySync $birthdaySync
+        BirthdaySync $birthdaySync,
+        MailerInterface $mailer,
+        UrlGeneratorInterface $urlGenerator
     ): Response {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -49,8 +51,36 @@ class SecurityController extends AbstractController
                 $this->addFlash('error', 'Cet email est déjà utilisé.');
             } else {
                 $user->setPassword($hasher->hashPassword($user, $user->getPassword()));
+                $user->setEmailVerified(false);
+                $verifyToken = bin2hex(random_bytes(32));
+                $user->setEmailVerifyToken($verifyToken);
+                $user->setEmailVerifyExpiresAt(new \DateTimeImmutable('+24 hours'));
                 $em->persist($user);
                 $em->flush();
+
+                // Envoi de l'email de vérification de l'adresse
+                $verifyLink = $urlGenerator->generate(
+                    'app_verify_email',
+                    ['token' => $verifyToken],
+                    UrlGeneratorInterface::ABSOLUTE_URL
+                );
+
+                try {
+                    $mail = (new Email())
+                        ->from($this->getParameter('app.mail_from'))
+                        ->to($user->getEmail())
+                        ->subject('Confirmez votre adresse email TribuConnect')
+                        ->text(
+                            "Bonjour " . $user->getFirstName() . ",\n\n" .
+                            "Merci de votre inscription sur TribuConnect.\n\n" .
+                            "Pour activer votre compte et pouvoir vous connecter, merci de confirmer votre adresse email en cliquant sur le lien suivant (valide 24 heures) :\n" .
+                            $verifyLink . "\n\n" .
+                            "Si vous n'êtes pas à l'origine de cette inscription, vous pouvez ignorer cet email."
+                        );
+                    $mailer->send($mail);
+                } catch (\Throwable $e) {
+                    $this->addFlash('error', "Compte créé mais l'email de confirmation n'a pas pu être envoyée. Veuillez réessayer plus tard.");
+                }
 
                 // Si l'utilisateur vient d'une invitation, le rattacher automatiquement à la famille
                 $session = $request->getSession();
@@ -71,7 +101,7 @@ class SecurityController extends AbstractController
                     $session->remove('pending_invitation_token');
                 }
 
-                $this->addFlash('success', 'Compte créé. Vous pouvez vous connecter.');
+                $this->addFlash('success', 'Compte créé. Un email de confirmation vous a été envoyé.');
                 return $this->redirectToRoute('app_login');
             }
         }
@@ -180,5 +210,28 @@ class SecurityController extends AbstractController
             'email' => $user->getEmail(),
         ]);
     }
-}
 
+    #[Route('/verification-email/{token}', name: 'app_verify_email')]
+    public function verifyEmail(
+        string $token,
+        UserRepository $users,
+        EntityManagerInterface $em
+    ): Response {
+        $user = $users->findOneBy(['emailVerifyToken' => $token]);
+        $now = new \DateTimeImmutable();
+
+        if (!$user || !$user->getEmailVerifyExpiresAt() || $user->getEmailVerifyExpiresAt() < $now) {
+            $this->addFlash('error', 'Lien de vérification invalide ou expiré.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $user->setEmailVerified(true);
+        $user->setEmailVerifyToken(null);
+        $user->setEmailVerifyExpiresAt(null);
+        $em->flush();
+
+        $this->addFlash('success', 'Adresse email vérifiée. Vous pouvez maintenant vous connecter.');
+
+        return $this->redirectToRoute('app_login');
+    }
+}
